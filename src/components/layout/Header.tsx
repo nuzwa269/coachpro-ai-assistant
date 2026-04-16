@@ -1,13 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
-import { Zap, Menu, X, User, CreditCard } from "lucide-react";
+import { Menu, X, User, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { mockUser } from "@/data/mock-data";
+import logo from "@/assets/logo.png";
 
 const navLinks = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Assistants", href: "/assistants" },
+  { label: "EduPro", href: "/#features" },
+  { label: "Tools", href: "/assistants" },
+  { label: "Subscription Plans", href: "/pricing" },
+  { label: "Member Pro", href: "/dashboard" },
 ];
 
 const authLinks = [
@@ -24,27 +26,27 @@ export function Header() {
   const links = isLoggedIn ? authLinks : navLinks;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Zap className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="font-heading text-xl font-bold">CoachPro AI</span>
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-1">
+          <img src={logo} alt="CoachPro AI" className="h-10 w-auto" />
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        {/* Center Nav */}
+        <nav className="hidden items-center gap-8 md:flex">
           {links.map((l) => (
             <Link
               key={l.href}
               to={l.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
             >
               {l.label}
             </Link>
           ))}
         </nav>
 
+        {/* Right Side */}
         <div className="hidden items-center gap-3 md:flex">
           {isLoggedIn ? (
             <>
@@ -59,14 +61,9 @@ export function Header() {
               </Link>
             </>
           ) : (
-            <>
-              <Button variant="ghost" asChild>
-                <Link to="/login">Log In</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/signup">Get Started</Link>
-              </Button>
-            </>
+            <Button asChild className="rounded-full bg-primary px-6 font-semibold text-primary-foreground hover:bg-brand-orange-hover">
+              <Link to="/login">LOGIN / SIGN UP</Link>
+            </Button>
           )}
         </div>
 
@@ -92,14 +89,9 @@ export function Header() {
               </Link>
             ))}
             {!isLoggedIn && (
-              <div className="flex gap-2 pt-2">
-                <Button variant="ghost" asChild className="flex-1">
-                  <Link to="/login">Log In</Link>
-                </Button>
-                <Button asChild className="flex-1">
-                  <Link to="/signup">Get Started</Link>
-                </Button>
-              </div>
+              <Button asChild className="mt-2 rounded-full">
+                <Link to="/login">LOGIN / SIGN UP</Link>
+              </Button>
             )}
           </nav>
         </div>
