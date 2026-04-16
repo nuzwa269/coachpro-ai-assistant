@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Zap } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export default function Signup() {
   return (
@@ -14,8 +14,8 @@ export default function Signup() {
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md border border-border">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-              <Zap className="h-6 w-6 text-primary-foreground" />
+            <div className="mx-auto mb-4">
+              <img src={logo} alt="CoachPro AI" className="h-16 w-auto mx-auto" />
             </div>
             <CardTitle className="text-2xl">Create Account</CardTitle>
             <CardDescription>Start your tech learning journey with CoachPro AI</CardDescription>
@@ -33,7 +33,7 @@ export default function Signup() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" placeholder="Create a password" />
             </div>
-            <Button className="w-full" asChild>
+            <Button className="w-full rounded-full" asChild>
               <Link to="/dashboard">Create Account</Link>
             </Button>
             <p className="text-center text-sm text-muted-foreground">

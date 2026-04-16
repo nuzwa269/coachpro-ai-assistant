@@ -5,9 +5,10 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { prebuiltAssistants, subscriptionPlans, creditPacks } from "@/data/mock-data";
 import {
-  Zap, ArrowRight, BookOpen, Code, Building2, Lightbulb, Bug,
+  ArrowRight, BookOpen, Code, Building2, Lightbulb, Bug,
   GraduationCap, CreditCard, Smartphone, Landmark, MessageCircle,
-  Check, Sparkles, Users, FolderOpen, Bookmark
+  Check, Sparkles, Users, FolderOpen, Bookmark, Cpu, Layers,
+  PenTool, FileText, ClipboardList, Palette,
 } from "lucide-react";
 
 const iconMap: Record<string, React.ElementType> = {
@@ -23,45 +24,124 @@ const features = [
   { icon: BookOpen, title: "Build Systems", desc: "Go beyond learning. Build real software systems with AI guidance." },
 ];
 
+const educationSuite = [
+  { icon: Cpu, title: "EduAssess Pro", desc: "AI-powered tools to create and manage assessments." },
+  { icon: PenTool, title: "StudyByte Pro", desc: "Get AI-powered bite-sized study content for quick learning." },
+  { icon: GraduationCap, title: "EduPlanner Pro", desc: "AI makes lesson planning simple and effective." },
+  { icon: ClipboardList, title: "EduPaper Pro", desc: "AI-powered tools to create and manage papers." },
+  { icon: Palette, title: "EduActivity Pro", desc: "Interactive activities and puzzles for learning." },
+  { icon: FileText, title: "24x7 Tutor Pro", desc: "AI-powered tutoring for 24x7 doubt-solving and effective learning." },
+];
+
+const smartSolutions = [
+  { icon: Layers, title: "Your AI Journey", desc: "Explore AI tools tailored for your workflow.", color: "text-primary" },
+  { icon: Cpu, title: "Get Started Now", desc: "Jump into AI-powered learning and building.", color: "text-secondary" },
+  { icon: BookOpen, title: "Power User Tools", desc: "Advanced tools for creators and educators.", color: "text-primary" },
+];
+
 export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden py-20 md:py-32">
-        <div className="absolute inset-0 bg-purple-gradient opacity-5" />
-        <div className="container relative text-center">
+      {/* Hero — matching coachproai.com warm gradient with geometric patterns */}
+      <section className="hero-bg hero-pattern relative overflow-hidden py-24 md:py-36">
+        <div className="container relative z-10 text-center">
           <div className="mx-auto max-w-3xl space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-4 py-1.5 text-sm font-medium">
-              <Zap className="h-4 w-4 text-primary" />
-              AI Platform for Tech Education
-            </div>
-            <h1 className="font-heading text-4xl font-extrabold tracking-tight md:text-6xl">
-              Learn Tech. Build Systems.{" "}
-              <span className="text-primary">With AI.</span>
+            <h1 className="font-heading text-5xl font-extrabold tracking-tight text-foreground md:text-7xl">
+              CoachProAi
             </h1>
+            <h2 className="font-heading text-2xl font-semibold text-foreground/80 md:text-3xl">
+              Where Ideas Become Tools
+            </h2>
             <p className="mx-auto max-w-xl text-lg text-muted-foreground">
-              CoachPro AI helps you learn programming, design architectures, and build
-              real software systems with intelligent AI assistants.
+              Simple, fast, powerful AI tools for learning, teaching, and creating.
             </p>
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <Button size="lg" asChild className="gap-2">
+            <div className="pt-4">
+              <Button size="lg" asChild className="rounded-full bg-primary px-8 py-6 text-base font-semibold text-primary-foreground shadow-lg hover:bg-brand-orange-hover hover:shadow-xl transition-all">
                 <Link to="/signup">
-                  Get Started Free <ArrowRight className="h-4 w-4" />
+                  Explore More
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/pricing">View Pricing</Link>
-              </Button>
             </div>
-            <p className="text-sm text-muted-foreground">20 free credits on signup. No credit card required.</p>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="border-t border-border bg-muted/30 py-20">
+      {/* Endless Possibilities — Purple gradient section */}
+      <section className="section-purple-gradient py-16 text-white">
+        <div className="container">
+          <div className="text-center">
+            <h2 className="font-heading text-3xl font-bold md:text-4xl">
+              Endless <span className="italic">Possibilities</span>
+            </h2>
+            <p className="mt-3 text-white/80">
+              Dive in and let AI transform the way you learn, teach, and create.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Prompt & Image Generation Tools */}
+      <section className="py-16 md:py-20">
+        <div className="container text-center">
+          <h2 className="font-heading text-3xl font-bold">
+            Prompt & <span className="text-secondary italic">Image Generation</span> Tools
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+            We turn text, style, and simple ideas into beautiful visuals.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            {["AI Image FX", "Prompt Studio", "Quick Image Tools"].map((tool) => (
+              <Button key={tool} variant="outline" className="rounded-full border-primary/30 px-6 text-foreground hover:bg-primary/5">
+                {tool}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Connecting Teachers Section */}
+      <section className="section-purple-gradient py-16 text-white">
+        <div className="container text-center">
+          <h2 className="font-heading text-3xl font-bold md:text-4xl">
+            AI <span className="italic underline decoration-white/40">Connecting Teachers</span>
+          </h2>
+          <h3 className="mt-2 font-heading text-xl font-semibold">
+            with Smarter Tools
+          </h3>
+          <p className="mx-auto mt-4 max-w-2xl text-white/80">
+            CoachPro bridges the gap between education and innovation by equipping educators with AI tools that simplify teaching and amplify learning.
+          </p>
+        </div>
+      </section>
+
+      {/* Featured Education Suite */}
+      <section className="section-warm py-16 md:py-20">
+        <div className="container">
+          <div className="mb-12 text-center">
+            <h2 className="font-heading text-3xl font-bold">Featured Education Suite</h2>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {educationSuite.map((item) => (
+              <Card key={item.title} className="border border-border bg-card text-center transition-all hover:shadow-lg hover:-translate-y-1">
+                <CardHeader>
+                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                    <item.icon className="h-7 w-7 text-primary" />
+                  </div>
+                  <CardTitle className="text-lg">{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{item.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Everything You Need — Features */}
+      <section id="features" className="py-16 md:py-20">
         <div className="container">
           <div className="mb-12 text-center">
             <h2 className="font-heading text-3xl font-bold">Everything You Need to Learn & Build</h2>
@@ -69,7 +149,7 @@ export default function Index() {
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
-              <Card key={f.title} className="border border-border bg-card transition-shadow hover:shadow-md">
+              <Card key={f.title} className="border border-border bg-card transition-all hover:shadow-lg hover:-translate-y-1">
                 <CardHeader>
                   <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                     <f.icon className="h-5 w-5 text-primary" />
@@ -85,8 +165,25 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Assistants Preview */}
-      <section className="py-20">
+      {/* Smart Solutions */}
+      <section className="py-16 md:py-20">
+        <div className="container text-center">
+          <h2 className="font-heading text-3xl font-bold">
+            Here are your <span className="text-secondary italic">Smart Solutions</span>
+          </h2>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            {smartSolutions.map((s) => (
+              <Button key={s.title} variant="outline" className="rounded-full border-primary/30 px-6 py-5 text-foreground hover:bg-primary/5">
+                <s.icon className={`mr-2 h-4 w-4 ${s.color}`} />
+                {s.title}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pre-Built AI Assistants */}
+      <section className="section-warm py-16 md:py-20">
         <div className="container">
           <div className="mb-12 text-center">
             <h2 className="font-heading text-3xl font-bold">Pre-Built AI Assistants</h2>
@@ -96,7 +193,7 @@ export default function Index() {
             {prebuiltAssistants.map((a) => {
               const Icon = iconMap[a.icon] || Code;
               return (
-                <Card key={a.id} className="border border-border bg-card text-center transition-shadow hover:shadow-md">
+                <Card key={a.id} className="border border-border bg-card text-center transition-all hover:shadow-lg hover:-translate-y-1">
                   <CardHeader>
                     <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-xl bg-secondary/10">
                       <Icon className="h-7 w-7 text-secondary" />
@@ -114,7 +211,7 @@ export default function Index() {
       </section>
 
       {/* Pricing Preview */}
-      <section className="border-t border-border bg-muted/30 py-20">
+      <section className="py-16 md:py-20">
         <div className="container">
           <div className="mb-12 text-center">
             <h2 className="font-heading text-3xl font-bold">Simple, Flexible Pricing</h2>
@@ -124,12 +221,12 @@ export default function Index() {
             {subscriptionPlans.map((plan) => (
               <Card
                 key={plan.id}
-                className={`relative border bg-card transition-shadow hover:shadow-md ${
+                className={`relative border bg-card transition-all hover:shadow-lg ${
                   plan.popular ? "border-primary shadow-lg ring-2 ring-primary/20" : "border-border"
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground">
                     Most Popular
                   </div>
                 )}
@@ -152,7 +249,7 @@ export default function Index() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="mt-6 w-full" variant={plan.popular ? "default" : "outline"} asChild>
+                  <Button className="mt-6 w-full rounded-full" variant={plan.popular ? "default" : "outline"} asChild>
                     <Link to="/signup">{plan.price === 0 ? "Start Free" : "Subscribe"}</Link>
                   </Button>
                 </CardContent>
@@ -165,12 +262,12 @@ export default function Index() {
             <h3 className="mb-6 text-center font-heading text-2xl font-bold">Or Buy Credit Packs</h3>
             <div className="grid gap-4 sm:grid-cols-3">
               {creditPacks.map((p) => (
-                <Card key={p.id} className="border border-border bg-card text-center">
+                <Card key={p.id} className="border border-border bg-card text-center transition-all hover:shadow-md">
                   <CardContent className="pt-6">
                     <p className="font-heading text-lg font-semibold">{p.name}</p>
                     <p className="mt-1 text-3xl font-bold text-primary">{p.credits} Credits</p>
                     <p className="mt-1 text-muted-foreground">Rs {p.price}</p>
-                    <Button className="mt-4 w-full" variant="outline">Buy Now</Button>
+                    <Button className="mt-4 w-full rounded-full" variant="outline">Buy Now</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -187,7 +284,7 @@ export default function Index() {
                 { icon: Landmark, label: "Bank Transfer" },
                 { icon: MessageCircle, label: "WhatsApp" },
               ].map((m) => (
-                <div key={m.label} className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm">
+                <div key={m.label} className="flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 text-sm">
                   <m.icon className="h-4 w-4 text-muted-foreground" />
                   {m.label}
                 </div>
@@ -197,14 +294,14 @@ export default function Index() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-purple-gradient py-20 text-center text-white">
+      {/* Tomorrow Starts Here CTA */}
+      <section className="section-purple-gradient py-20 text-center text-white">
         <div className="container">
-          <h2 className="font-heading text-3xl font-bold">Ready to Start Learning?</h2>
-          <p className="mx-auto mt-3 max-w-md text-white/80">
-            Join CoachPro AI today and start building your tech skills with the power of AI.
+          <h2 className="font-heading text-3xl font-bold md:text-4xl">Tomorrow Starts Here</h2>
+          <p className="mx-auto mt-4 max-w-lg text-white/80">
+            At CoachPro, we believe in a future powered by AI. Whether you are a teacher, a student, or a creator — the power is in your hands. Join us and start building something extraordinary.
           </p>
-          <Button size="lg" className="mt-8 bg-white text-foreground hover:bg-white/90" asChild>
+          <Button size="lg" className="mt-8 rounded-full bg-white px-8 text-foreground hover:bg-white/90 shadow-lg" asChild>
             <Link to="/signup">
               Get Started Free <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
