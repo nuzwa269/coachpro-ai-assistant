@@ -1,89 +1,52 @@
 
 
-# CoachPro AI — Frontend UI Plan
+# Final Decisions Locked
 
-## Design System Setup
-Update `tailwind.config.ts` and `src/index.css` with the brand colors (orange #FF8A00, purple #9333EA, dark #0A0A0A, light #FAFAFA), fonts (Poppins for headings, Inter for body), and gradient utilities. All Lucide icons, no emojis.
+## 1. Free User — Choose Any 1 Prebuilt Assistant
+Free user signup ke baad **kisi bhi 1 prebuilt assistant** ko activate kar sakta hai (Code Tutor / System Architect / Debug Helper / Tech Explainer — koi bhi). Baqi 3 lock honge. Switch karna chahe to current active wala deactivate karke doosra activate kare (sirf 1 active at a time).
 
-## Pages to Build (Frontend Only — Mock Data)
+**DB change:**
+- `assistants` table se `min_plan` column hata diya — sab prebuilt sab ke liye visible hain (badges ke saath)
+- New table **`user_active_assistants`**: `user_id`, `assistant_id`, `activated_at` — free user ke liye max 1 row (DB trigger se enforce)
+- Paid users (basic/pro) ke liye unlimited rows (sab unlock)
 
-### 1. Landing Page (`/`)
-- Hero with "Learn Tech. Build Systems. With AI." tagline, orange CTA button
-- Features section (cards with Lucide icons)
-- Pre-built assistants preview (Code Tutor, System Architect, Debug Helper, Tech Explainer)
-- Pricing section (Free, Basic, Pro plans + credit packs)
-- Payment methods note: JazzCash, Easypaisa, Bank Transfer, WhatsApp
-- Footer with dark background
+**UI:**
+- Assistants page par har prebuilt card par button: "Activate" (free user). Ek active hone ke baad baqi par "Locked — switch karne ke liye current ko deactivate karein"
+- Active assistant par green checkmark badge
 
-### 2. Auth Pages (`/login`, `/signup`)
-- Clean forms with email/password fields
-- No backend wiring yet — just UI
+## 2. Per-Model Credit Pricing — Editable Anytime ✓
+Haan, **bilkul baad mein bhi badal sakte hain** bina code change ke. Pricing `ai_models` table mein store hogi (DB row), code mein hardcoded nahi.
 
-### 3. Dashboard (`/dashboard`)
-- Header with logo, credit balance display, user avatar
-- Project cards grid (create/edit/delete with mock data)
-- Recent conversations sidebar
-- "Create New Project" dialog
+**Admin Panel → AI Models tab mein:**
+- Har model ke saamne `credits_cost` field editable
+- "Save" karte hi naya cost foran apply ho jayega (next message se)
+- Naya model add karna ho to "Add Model" button — model ID, name, cost set karein
+- Model band karna ho to `is_active = false` toggle
 
-### 4. Project Workspace (`/project/:id`)
-- Left sidebar: conversation list + assistant picker
-- Center: chat interface with message bubbles
-- Right panel: assistant info card
-- Save response (bookmark) button on AI messages
-- Credit cost indicator
+**Initial pricing** (jo aap ne approve kiya): 1 credit (cheap) se 10 credits (premium GPT) tak. Ye sirf **starting values** hain — kabhi bhi admin panel se badal sakte hain.
 
-### 5. Assistants Page (`/assistants`)
-- Pre-built assistants grid (with icons, descriptions)
-- "Create Custom Assistant" form (name, description, system prompt, icon picker)
-- Edit/delete custom assistants
+## 3. Confirmed Final Rules
 
-### 6. Saved Responses (`/saved`)
-- List of bookmarked AI responses grouped by project
-- Search/filter bar
+| Setting | Value |
+|---|---|
+| Signup credits | **20** (one-time) |
+| Free projects | 3 max |
+| Free prebuilt assistants | **Any 1 of 4** (user chooses) |
+| Free custom assistants | 1 max |
+| Free saved responses | 10 max |
+| Per-model pricing | Stored in DB, admin-editable |
+| Pricing changes | Live via Admin Panel, no code |
 
-### 7. Pricing/Credits Page (`/pricing`)
-- Subscription plans comparison table
-- One-time credit packs
-- Payment method icons (JazzCash, Easypaisa, Bank, WhatsApp)
+## Next Step
+Sab decisions ab final hain. **Implementation shuru karne ke liye approve karein** — main ye order mein build karunga:
 
-### 8. Settings (`/settings`)
-- Profile edit form
-- Subscription status card
-- Credit history table
+1. Lovable Cloud enable + Email/Google auth (login/signup pages real)
+2. DB migrations: enums, all tables, RLS policies, triggers, functions
+3. Seed data: prebuilt assistants + AI models + plans + packs
+4. Wire frontend (Dashboard, Projects, Workspace, Saved, Settings) to real DB
+5. BuyCredits — real payment_requests submit
+6. Admin Panel (`/admin`) — Users, Payments, AI Models, Assistants, Plans tabs
+7. AI chat integration via Lovable AI Gateway with per-model deduction
 
-## File Structure
-```text
-src/
-  components/
-    layout/       — Header, Sidebar, Footer
-    landing/      — Hero, Features, Pricing sections
-    dashboard/    — ProjectCard, CreditBalance
-    chat/         — ChatMessage, ChatInput, AssistantPicker
-    assistants/   — AssistantCard, CreateAssistantForm
-  pages/
-    Index.tsx, Login.tsx, Signup.tsx, Dashboard.tsx,
-    ProjectWorkspace.tsx, Assistants.tsx, SavedResponses.tsx,
-    Pricing.tsx, Settings.tsx
-  data/
-    mock-data.ts  — mock projects, assistants, conversations, credits
-```
-
-## Technical Notes
-- React Router for all pages
-- All data is mock/static — no Supabase or API calls yet
-- Responsive design (mobile-first)
-- Dark footer, light main body per brand guidelines
-- Google Fonts: Poppins + Inter loaded in `index.html`
-
-## Implementation Order
-1. Design system (colors, fonts, tailwind config)
-2. Layout components (Header, Footer, Sidebar)
-3. Landing page
-4. Auth pages (UI only)
-5. Dashboard with mock projects
-6. Project workspace with mock chat
-7. Assistants management page
-8. Saved responses page
-9. Pricing page with local payment methods
-10. Settings page
+Approve karein to step 1 se shuru karta hun.
 
