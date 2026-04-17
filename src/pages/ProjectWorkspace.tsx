@@ -58,7 +58,7 @@ export default function ProjectWorkspace() {
 
   return (
     <AppShell>
-      <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="flex h-full overflow-hidden">
         {/* Left Sidebar */}
         <aside className="hidden w-72 shrink-0 border-r border-border bg-card p-4 md:block">
           <Link to="/dashboard" className="mb-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
