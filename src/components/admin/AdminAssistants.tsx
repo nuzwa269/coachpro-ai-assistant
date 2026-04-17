@@ -136,12 +136,12 @@ export function AdminAssistants() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-4">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>Assistants ({items.length})</CardTitle>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreate} size="sm" className="gap-2">
-              <Plus className="h-4 w-4" /> Add Prebuilt
+            <Button onClick={openCreate} size="sm" className="h-10 w-full gap-2 sm:w-auto">
+              <Plus className="h-4 w-4" /> Add Prebuilt Assistant
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -163,7 +163,7 @@ export function AdminAssistants() {
                 <Input id="description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short tagline" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div className="grid gap-2">
                   <Label htmlFor="category">Category</Label>
                   <Input id="category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Coding" />

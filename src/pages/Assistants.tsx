@@ -203,12 +203,12 @@ export default function Assistants() {
         </section>
 
         <section>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-heading text-lg font-semibold text-foreground">Your Custom Assistants</h2>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={openCreate} size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" /> Create Assistant
+                <Button onClick={openCreate} size="sm" className="h-10 shrink-0 gap-2">
+                  <Plus className="h-4 w-4" /> <span className="hidden xs:inline">Create Assistant</span><span className="xs:hidden">Create</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>

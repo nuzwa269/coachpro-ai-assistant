@@ -94,15 +94,15 @@ export default function Projects() {
   return (
     <AppShell>
       <div className="w-full space-y-6 p-4 sm:p-6">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
             <h1 className="font-heading text-2xl font-bold text-foreground sm:text-3xl">Projects</h1>
             <p className="mt-1 text-sm text-muted-foreground">All your AI-powered workspaces.</p>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button onClick={openCreate} className="gap-2">
-                <Plus className="h-4 w-4" /> New Project
+              <Button onClick={openCreate} className="h-10 shrink-0 gap-2">
+                <Plus className="h-4 w-4" /> <span className="hidden xs:inline">New Project</span><span className="xs:hidden">New</span>
               </Button>
             </DialogTrigger>
             <DialogContent>

@@ -222,10 +222,10 @@ export default function BuyCredits() {
               <div key={m.id} className="rounded-xl border border-border bg-card p-5">
                 <p className="text-sm font-semibold text-foreground">{m.name}</p>
                 <div className="mt-3 flex items-center gap-2">
-                  <code className="flex-1 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-foreground">{m.value}</code>
+                  <code className="min-w-0 flex-1 truncate rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-foreground">{m.value}</code>
                   <button
                     onClick={() => copy(m.value)}
-                    className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     aria-label={`Copy ${m.name}`}
                   >
                     <Copy className="h-4 w-4" />
@@ -244,10 +244,10 @@ export default function BuyCredits() {
             <div className="grid gap-4">
               <div className="rounded-lg bg-muted/40 p-4 text-sm">
                 {selection ? (
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="min-w-0">
                       <p className="text-xs uppercase tracking-wide text-muted-foreground">Selected</p>
-                      <p className="mt-1 font-semibold text-foreground">
+                      <p className="mt-1 truncate font-semibold text-foreground">
                         {selection.name} <span className="text-muted-foreground">({selection.kind === "credit_pack" ? "one-time" : "monthly"})</span>
                       </p>
                     </div>

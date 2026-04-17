@@ -195,27 +195,27 @@ export default function SavedResponses() {
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-7 w-7"
+                      className="h-9 w-9"
                       onClick={() => copyText(m.message_content)}
                       aria-label="Copy"
                     >
-                      <Copy className="h-3.5 w-3.5" />
+                      <Copy className="h-4 w-4" />
                     </Button>
                     {m.project_id && (
-                      <Button asChild size="icon" variant="ghost" className="h-7 w-7" aria-label="Open conversation">
+                      <Button asChild size="icon" variant="ghost" className="h-9 w-9" aria-label="Open conversation">
                         <Link to={`/project/${m.project_id}`}>
-                          <ExternalLink className="h-3.5 w-3.5" />
+                          <ExternalLink className="h-4 w-4" />
                         </Link>
                       </Button>
                     )}
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-7 w-7 text-destructive hover:text-destructive"
+                      className="h-9 w-9 text-destructive hover:text-destructive"
                       onClick={() => unsave(m.id)}
                       aria-label="Unsave"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
