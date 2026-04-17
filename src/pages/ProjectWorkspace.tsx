@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Header } from "@/components/layout/Header";
+import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,9 +57,8 @@ export default function ProjectWorkspace() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Header />
-      <div className="flex flex-1 overflow-hidden">
+    <AppShell>
+      <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
         {/* Left Sidebar */}
         <aside className="hidden w-72 shrink-0 border-r border-border bg-card p-4 md:block">
           <Link to="/dashboard" className="mb-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
@@ -207,6 +206,6 @@ export default function ProjectWorkspace() {
           )}
         </aside>
       </div>
-    </div>
+    </AppShell>
   );
 }
