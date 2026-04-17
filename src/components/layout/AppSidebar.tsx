@@ -9,6 +9,7 @@ const navItems = [
   { label: "Projects", to: "/projects", icon: FolderKanban },
   { label: "Saved Outputs", to: "/saved", icon: Bookmark },
   { label: "Buy Credits", to: "/buy-credits", icon: Coins },
+  { label: "Settings", to: "/settings", icon: Settings },
 ];
 
 interface AppSidebarProps {
@@ -48,13 +49,6 @@ export function AppSidebar({ mobileMode = false, onNavigate }: AppSidebarProps) 
               {item.label}
             </NavLink>
           ))}
-          <div className="flex cursor-not-allowed items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground/60">
-            <span className="flex items-center gap-3">
-              <Settings className="h-4 w-4" />
-              Settings
-            </span>
-            <span className="text-xs">(Soon)</span>
-          </div>
         </nav>
 
         {/* Footer */}

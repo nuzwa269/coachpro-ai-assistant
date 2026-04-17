@@ -10,6 +10,7 @@ import Projects from "./pages/Projects.tsx";
 import ProjectWorkspace from "./pages/ProjectWorkspace.tsx";
 import SavedResponses from "./pages/SavedResponses.tsx";
 import BuyCredits from "./pages/BuyCredits.tsx";
+import Settings from "./pages/Settings.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/project/:id" element={<ProjectWorkspace />} />
           <Route path="/saved" element={<SavedResponses />} />
           <Route path="/buy-credits" element={<BuyCredits />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
