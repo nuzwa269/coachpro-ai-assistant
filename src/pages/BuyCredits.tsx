@@ -44,7 +44,7 @@ export default function BuyCredits() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl space-y-8 p-4 sm:p-6 lg:p-8">
+      <div className="w-full space-y-8 p-4 sm:p-6 lg:p-8">
         <div>
           <h1 className="font-heading text-2xl font-bold text-foreground sm:text-3xl">Buy Credits</h1>
           <p className="mt-2 text-sm text-muted-foreground">

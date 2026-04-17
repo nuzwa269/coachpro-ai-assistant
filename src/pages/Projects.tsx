@@ -35,7 +35,7 @@ export default function Projects() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-heading text-2xl font-bold text-foreground sm:text-3xl">Projects</h1>
