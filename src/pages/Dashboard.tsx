@@ -46,7 +46,7 @@ export default function Dashboard() {
     <AppShell>
       <div className="w-full space-y-6 p-4 sm:p-6">
         {/* Welcome banner */}
-        <div className="rounded-2xl bg-gradient-to-r from-primary to-secondary p-6 text-primary-foreground sm:p-8">
+        <div className="rounded-2xl bg-primary p-6 text-primary-foreground sm:p-8">
           <div className="flex items-start gap-3">
             <Sparkles className="mt-1 h-6 w-6 shrink-0" />
             <div>
