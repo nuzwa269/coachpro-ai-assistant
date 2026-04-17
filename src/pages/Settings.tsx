@@ -128,8 +128,8 @@ export default function Settings() {
 
   return (
     <AppShell>
-      <div className="container max-w-3xl py-8">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="mx-auto w-full max-w-3xl space-y-6 p-4 sm:p-6 sm:py-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-heading text-3xl font-bold">Settings</h1>
           <Button variant="outline" size="sm" onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" /> Sign Out

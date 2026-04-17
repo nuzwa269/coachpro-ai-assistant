@@ -97,12 +97,12 @@ export default function Dashboard() {
         </div>
 
         <section>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-heading text-xl font-bold text-foreground">Recent Projects</h2>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Plus className="h-4 w-4" /> New Project
+                <Button className="h-10 gap-2">
+                  <Plus className="h-4 w-4" /> <span className="hidden xs:inline">New Project</span><span className="xs:hidden">New</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -163,10 +163,10 @@ export default function Dashboard() {
         </section>
 
         <section>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-heading text-xl font-bold text-foreground">AI Assistants</h2>
             <Button variant="outline" size="sm" onClick={() => navigate("/assistants")} className="gap-2">
-              <Bot className="h-4 w-4" /> Manage Assistants
+              <Bot className="h-4 w-4" /> <span className="hidden sm:inline">Manage Assistants</span><span className="sm:hidden">Manage</span>
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">
