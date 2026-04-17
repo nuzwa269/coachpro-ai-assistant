@@ -1,5 +1,4 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,8 +17,7 @@ const creditHistory = [
 
 export default function Settings() {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <AppShell>
       <div className="container max-w-3xl py-8">
         <h1 className="mb-8 font-heading text-3xl font-bold">Settings</h1>
 
@@ -98,7 +96,6 @@ export default function Settings() {
           </CardContent>
         </Card>
       </div>
-      <Footer />
-    </div>
+    </AppShell>
   );
 }
