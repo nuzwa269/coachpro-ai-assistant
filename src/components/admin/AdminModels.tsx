@@ -171,10 +171,10 @@ export function AdminModels() {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle>AI Models ({models.length})</CardTitle>
-          <Button size="sm" onClick={openCreate}>
-            <Plus className="mr-1.5 h-4 w-4" /> Add Model
+          <Button size="sm" onClick={openCreate} className="h-10 w-full gap-2 sm:w-auto">
+            <Plus className="h-4 w-4" /> Add Model
           </Button>
         </CardHeader>
         <CardContent>
@@ -267,7 +267,7 @@ export function AdminModels() {
           </DialogHeader>
 
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label>Model ID (internal slug) *</Label>
                 <Input
@@ -287,7 +287,7 @@ export function AdminModels() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label>Provider Label *</Label>
                 <Input
@@ -361,7 +361,7 @@ export function AdminModels() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label>Credits / Message *</Label>
                 <Input

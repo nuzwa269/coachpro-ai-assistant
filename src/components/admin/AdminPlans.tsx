@@ -81,10 +81,12 @@ export function AdminPlans() {
 
   return (
     <Tabs defaultValue="plans" className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="plans">Subscription Plans ({plans.length})</TabsTrigger>
-        <TabsTrigger value="packs">Credit Packs ({packs.length})</TabsTrigger>
-      </TabsList>
+      <div className="-mx-2 overflow-x-auto px-2">
+        <TabsList>
+          <TabsTrigger value="plans">Subscription Plans ({plans.length})</TabsTrigger>
+          <TabsTrigger value="packs">Credit Packs ({packs.length})</TabsTrigger>
+        </TabsList>
+      </div>
 
       <TabsContent value="plans">
         <Card>

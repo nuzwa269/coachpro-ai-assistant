@@ -142,11 +142,13 @@ export function AdminPayments() {
       </CardHeader>
       <CardContent>
         <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-          <TabsList>
-            <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="approved">Approved</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected</TabsTrigger>
-          </TabsList>
+          <div className="-mx-2 overflow-x-auto px-2">
+            <TabsList>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="approved">Approved</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected</TabsTrigger>
+            </TabsList>
+          </div>
           <TabsContent value={tab} className="mt-4">
             {loading ? (
               <div className="flex justify-center py-12">
@@ -179,7 +181,7 @@ export function AdminPayments() {
                         {r.notes && <p className="text-xs italic text-muted-foreground">User note: {r.notes}</p>}
                         {r.admin_notes && <p className="text-xs italic text-destructive">Admin: {r.admin_notes}</p>}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                         {r.proof_url && (
                           <Button size="sm" variant="outline" onClick={() => viewProof(r.proof_url!)}>
                             <Eye className="mr-1 h-4 w-4" /> Proof
