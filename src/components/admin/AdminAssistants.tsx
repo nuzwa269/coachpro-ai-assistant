@@ -4,31 +4,73 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Assistant = {
   id: string;
   name: string;
+  description: string | null;
   category: string | null;
+  icon: string;
+  system_prompt: string;
+  default_model_id: string | null;
   is_prebuilt: boolean;
   is_active: boolean;
   owner_id: string | null;
 };
 
+type ModelOpt = { id: string; display_name: string };
+
+const ICON_OPTIONS = [
+  "Bot", "Code2", "Sparkles", "Brain", "BookOpen", "Lightbulb",
+  "Wrench", "Rocket", "Target", "GraduationCap", "Cpu", "Zap",
+];
+
+const emptyForm = {
+  name: "",
+  description: "",
+  category: "",
+  icon: "Bot",
+  system_prompt: "",
+  default_model_id: "",
+};
+
 export function AdminAssistants() {
   const [items, setItems] = useState<Assistant[]>([]);
+  const [models, setModels] = useState<ModelOpt[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState<Assistant | null>(null);
+  const [form, setForm] = useState(emptyForm);
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("assistants")
-      .select("id,name,category,is_prebuilt,is_active,owner_id")
-      .order("is_prebuilt", { ascending: false })
-      .order("name");
-    if (error) toast.error(error.message);
-    setItems((data ?? []) as Assistant[]);
+    const [a, m] = await Promise.all([
+      supabase
+        .from("assistants")
+        .select("id,name,description,category,icon,system_prompt,default_model_id,is_prebuilt,is_active,owner_id")
+        .order("is_prebuilt", { ascending: false })
+        .order("name"),
+      supabase.from("ai_models").select("id,display_name").eq("is_active", true).order("display_name"),
+    ]);
+    if (a.error) toast.error(a.error.message);
+    if (m.error) toast.error(m.error.message);
+    setItems((a.data ?? []) as Assistant[]);
+    setModels((m.data ?? []) as ModelOpt[]);
     setLoading(false);
   };
 
@@ -36,18 +78,139 @@ export function AdminAssistants() {
 
   const toggle = async (id: string, is_active: boolean) => {
     const { error } = await supabase.from("assistants").update({ is_active }).eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    if (error) return toast.error(error.message);
     toast.success(is_active ? "Activated" : "Deactivated");
     setItems((arr) => arr.map((a) => (a.id === id ? { ...a, is_active } : a)));
   };
 
+  const openCreate = () => {
+    setEditing(null);
+    setForm(emptyForm);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (a: Assistant) => {
+    setEditing(a);
+    setForm({
+      name: a.name,
+      description: a.description ?? "",
+      category: a.category ?? "",
+      icon: a.icon || "Bot",
+      system_prompt: a.system_prompt,
+      default_model_id: a.default_model_id ?? "",
+    });
+    setDialogOpen(true);
+  };
+
+  const save = async () => {
+    if (!form.name.trim() || !form.system_prompt.trim()) {
+      return toast.error("Name and system prompt are required");
+    }
+    setSaving(true);
+    const payload = {
+      name: form.name.trim(),
+      description: form.description.trim() || null,
+      category: form.category.trim() || null,
+      icon: form.icon || "Bot",
+      system_prompt: form.system_prompt.trim(),
+      default_model_id: form.default_model_id || null,
+    };
+
+    const { error } = editing
+      ? await supabase.from("assistants").update(payload).eq("id", editing.id)
+      : await supabase.from("assistants").insert({ ...payload, is_prebuilt: true, owner_id: null, is_active: true });
+
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success(editing ? "Assistant updated" : "Prebuilt assistant created");
+    setDialogOpen(false);
+    load();
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await supabase.from("assistants").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted");
+    setItems((arr) => arr.filter((a) => a.id !== id));
+  };
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between gap-4">
         <CardTitle>Assistants ({items.length})</CardTitle>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={openCreate} size="sm" className="gap-2">
+              <Plus className="h-4 w-4" /> Add Prebuilt
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editing ? "Edit Assistant" : "New Prebuilt Assistant"}</DialogTitle>
+              <DialogDescription>
+                Prebuilt assistants are visible to all users. Free users can activate any 1.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Code Tutor" />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="description">Description</Label>
+                <Input id="description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Short tagline" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Input id="category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. Coding" />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Icon</Label>
+                  <Select value={form.icon} onValueChange={(v) => setForm({ ...form, icon: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {ICON_OPTIONS.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Default Model</Label>
+                <Select value={form.default_model_id || "none"} onValueChange={(v) => setForm({ ...form, default_model_id: v === "none" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {models.map((m) => <SelectItem key={m.id} value={m.id}>{m.display_name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="prompt">System Prompt *</Label>
+                <Textarea
+                  id="prompt"
+                  value={form.system_prompt}
+                  onChange={(e) => setForm({ ...form, system_prompt: e.target.value })}
+                  placeholder="You are a helpful coding tutor that..."
+                  rows={8}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={saving}>Cancel</Button>
+              <Button onClick={save} disabled={saving}>
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                {editing ? "Save changes" : "Create assistant"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -61,6 +224,7 @@ export function AdminAssistants() {
                   <TableHead>Category</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Active</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -75,6 +239,34 @@ export function AdminAssistants() {
                     </TableCell>
                     <TableCell>
                       <Switch checked={a.is_active} onCheckedChange={(v) => toggle(a.id, v)} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        {a.is_prebuilt && (
+                          <Button variant="ghost" size="icon" onClick={() => openEdit(a)} title="Edit">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" title="Delete">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete "{a.name}"?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This permanently removes the assistant. Conversations using it will lose their reference.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => remove(a.id)}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
