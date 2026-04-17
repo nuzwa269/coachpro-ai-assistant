@@ -330,7 +330,7 @@ export default function ProjectWorkspace() {
                               <Bot className="h-4 w-4 text-secondary" />
                             </div>
                           )}
-                          <div className={`relative max-w-[75%] rounded-xl px-4 py-3 text-sm ${
+                          <div className={`relative max-w-[85%] break-words rounded-xl px-3.5 py-3 text-sm sm:max-w-[75%] sm:px-4 ${
                             m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                           }`}>
                             <p className="whitespace-pre-wrap">{m.content}</p>
@@ -374,33 +374,51 @@ export default function ProjectWorkspace() {
                 </div>
               </div>
 
-              <div className="border-t border-border p-4">
+              <div className="border-t border-border p-3 sm:p-4">
                 <div className="mx-auto flex max-w-3xl gap-2">
                   <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
                     placeholder="Ask your AI assistant..."
-                    className="flex-1"
+                    className="h-11 flex-1"
                     disabled={sending}
                   />
-                  <Button onClick={handleSend} size="icon" disabled={sending || !input.trim()}>
+                  <Button onClick={handleSend} size="icon" className="h-11 w-11" disabled={sending || !input.trim()}>
                     {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-              <MessageCircle className="h-10 w-10 text-muted-foreground" />
-              <p className="font-medium">No conversation selected</p>
-              <p className="text-sm text-muted-foreground">Create a new conversation to get started.</p>
-              {availableAssistants.length === 0 && (
-                <Button asChild variant="outline" size="sm">
-                  <Link to="/assistants">Activate an assistant</Link>
-                </Button>
-              )}
-            </div>
+            <>
+              {/* Mobile menu trigger when no convo selected */}
+              <div className="flex items-center justify-between border-b border-border px-3 py-2.5 md:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <Menu className="h-4 w-4" /> Project Menu
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-80 max-w-[85vw] p-4">
+                    <SheetHeader className="mb-2 text-left">
+                      <SheetTitle className="text-base">Project</SheetTitle>
+                    </SheetHeader>
+                    {SidebarContent}
+                  </SheetContent>
+                </Sheet>
+              </div>
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center sm:p-8">
+                <MessageCircle className="h-10 w-10 text-muted-foreground" />
+                <p className="font-medium">No conversation selected</p>
+                <p className="text-sm text-muted-foreground">Create a new conversation to get started.</p>
+                {availableAssistants.length === 0 && (
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/assistants">Activate an assistant</Link>
+                  </Button>
+                )}
+              </div>
+            </>
           )}
         </div>
 
