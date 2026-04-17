@@ -14,6 +14,7 @@ import ProjectWorkspace from "./pages/ProjectWorkspace.tsx";
 import SavedResponses from "./pages/SavedResponses.tsx";
 import BuyCredits from "./pages/BuyCredits.tsx";
 import Settings from "./pages/Settings.tsx";
+import Admin from "./pages/Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/saved" element={<ProtectedRoute><SavedResponses /></ProtectedRoute>} />
             <Route path="/buy-credits" element={<ProtectedRoute><BuyCredits /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

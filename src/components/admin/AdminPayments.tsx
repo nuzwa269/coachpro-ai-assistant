@@ -164,7 +164,7 @@ export function AdminPayments() {
                           <span className="font-medium">{r.user_email ?? r.user_id.slice(0, 8)}</span>
                           <Badge variant="outline">{r.kind === "subscription" ? "Subscription" : "Credit Pack"}</Badge>
                           <Badge variant="secondary">{r.method}</Badge>
-                          {r.status === "approved" && <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/10">Approved</Badge>}
+                          {r.status === "approved" && <Badge>Approved</Badge>}
                           {r.status === "rejected" && <Badge variant="destructive">Rejected</Badge>}
                         </div>
                         <p className="text-sm text-muted-foreground">
