@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, Bookmark, Coins, Settings, LogOut, Shield } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Bot, Bookmark, Coins, Settings, LogOut, Shield } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Projects", to: "/projects", icon: FolderKanban },
+  { label: "Assistants", to: "/assistants", icon: Bot },
   { label: "Saved Outputs", to: "/saved", icon: Bookmark },
   { label: "Buy Credits", to: "/buy-credits", icon: Coins },
   { label: "Settings", to: "/settings", icon: Settings },

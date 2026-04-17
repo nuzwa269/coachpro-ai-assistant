@@ -9,6 +9,7 @@ import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Projects from "./pages/Projects.tsx";
+import Assistants from "./pages/Assistants.tsx";
 import ProjectWorkspace from "./pages/ProjectWorkspace.tsx";
 import SavedResponses from "./pages/SavedResponses.tsx";
 import BuyCredits from "./pages/BuyCredits.tsx";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+            <Route path="/assistants" element={<ProtectedRoute><Assistants /></ProtectedRoute>} />
             <Route path="/project/:id" element={<ProtectedRoute><ProjectWorkspace /></ProtectedRoute>} />
             <Route path="/saved" element={<ProtectedRoute><SavedResponses /></ProtectedRoute>} />
             <Route path="/buy-credits" element={<ProtectedRoute><BuyCredits /></ProtectedRoute>} />
