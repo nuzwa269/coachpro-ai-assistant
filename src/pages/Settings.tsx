@@ -46,12 +46,13 @@ export default function Settings() {
     if (profile?.name) setName(profile.name);
   }, [profile?.name]);
 
-  // Sign avatar URL
+  // Sign avatar URL (cache-bust on change)
   useEffect(() => {
     if (!profile?.avatar_url) { setAvatarSignedUrl(null); return; }
     (async () => {
-      const { data } = await supabase.storage.from("avatars").createSignedUrl(profile.avatar_url!, 3600);
-      setAvatarSignedUrl(data?.signedUrl ?? null);
+      const { data, error } = await supabase.storage.from("avatars").createSignedUrl(profile.avatar_url!, 3600);
+      if (error) { console.error("Signed URL error:", error); setAvatarSignedUrl(null); return; }
+      setAvatarSignedUrl(data?.signedUrl ? `${data.signedUrl}&t=${Date.now()}` : null);
     })();
   }, [profile?.avatar_url]);
 
