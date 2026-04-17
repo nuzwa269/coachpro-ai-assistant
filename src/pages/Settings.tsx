@@ -46,12 +46,13 @@ export default function Settings() {
     if (profile?.name) setName(profile.name);
   }, [profile?.name]);
 
-  // Sign avatar URL
+  // Sign avatar URL (cache-bust on change)
   useEffect(() => {
     if (!profile?.avatar_url) { setAvatarSignedUrl(null); return; }
     (async () => {
-      const { data } = await supabase.storage.from("avatars").createSignedUrl(profile.avatar_url!, 3600);
-      setAvatarSignedUrl(data?.signedUrl ?? null);
+      const { data, error } = await supabase.storage.from("avatars").createSignedUrl(profile.avatar_url!, 3600);
+      if (error) { console.error("Signed URL error:", error); setAvatarSignedUrl(null); return; }
+      setAvatarSignedUrl(data?.signedUrl ? `${data.signedUrl}&t=${Date.now()}` : null);
     })();
   }, [profile?.avatar_url]);
 
@@ -89,19 +90,32 @@ export default function Settings() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     if (file.size > 2 * 1024 * 1024) { toast.error("Max file size: 2MB"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Only image files allowed"); return; }
 
     setUploadingAvatar(true);
-    const ext = file.name.split(".").pop() || "png";
-    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (upErr) { toast.error(upErr.message); setUploadingAvatar(false); return; }
+    try {
+      const ext = (file.name.split(".").pop() || file.type.split("/")[1] || "png").toLowerCase();
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "3600" });
+      if (upErr) throw upErr;
 
-    const { error: updErr } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
-    setUploadingAvatar(false);
-    if (updErr) { toast.error(updErr.message); return; }
-    await refreshProfile();
-    toast.success("Avatar updated");
-    if (fileRef.current) fileRef.current.value = "";
+      const { error: updErr } = await supabase
+        .from("profiles")
+        .update({ avatar_url: path })
+        .eq("id", user.id);
+      if (updErr) throw updErr;
+
+      await refreshProfile();
+      toast.success("Avatar updated");
+    } catch (err: any) {
+      console.error("Avatar upload failed:", err);
+      toast.error(err?.message || "Avatar upload failed");
+    } finally {
+      setUploadingAvatar(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
   };
 
   const handleSignOut = async () => {
