@@ -44,7 +44,7 @@ export default function Dashboard() {
 
   return (
     <AppShell>
-      <div className="w-full space-y-8 p-4 sm:p-6 lg:p-8">
+      <div className="w-full space-y-6 p-4 sm:p-6">
         {/* Welcome banner */}
         <div className="rounded-2xl bg-gradient-to-r from-primary to-secondary p-6 text-primary-foreground sm:p-8">
           <div className="flex items-start gap-3">
