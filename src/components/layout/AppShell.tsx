@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
 import { AppSidebar } from "./AppSidebar";
+import { UserAvatarMenu } from "./UserAvatarMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { Coins, Menu, X } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -12,7 +13,6 @@ export function AppShell({ children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { profile } = useAuth();
   const credits = profile?.credits ?? 0;
-  const email = profile?.email ?? "";
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background md:flex-row">
@@ -24,6 +24,7 @@ export function AppShell({ children }: AppShellProps) {
             <Coins className="h-3 w-3" />
             {credits}
           </div>
+          <UserAvatarMenu size="sm" />
           <button
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
@@ -68,7 +69,7 @@ export function AppShell({ children }: AppShellProps) {
               <Coins className="h-3.5 w-3.5" />
               {credits}
             </div>
-            <span className="text-sm text-muted-foreground">{email}</span>
+            <UserAvatarMenu />
           </div>
         </header>
         <main className="flex-1 overflow-y-auto">{children}</main>
