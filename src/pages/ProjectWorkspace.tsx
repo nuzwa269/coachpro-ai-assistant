@@ -309,20 +309,26 @@ export default function ProjectWorkspace() {
                               <Bot className="h-4 w-4 text-secondary" />
                             </div>
                           )}
-                          <div className={`group relative max-w-[75%] rounded-xl px-4 py-3 text-sm ${
+                          <div className={`relative max-w-[75%] rounded-xl px-4 py-3 text-sm ${
                             m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                           }`}>
                             <p className="whitespace-pre-wrap">{m.content}</p>
                             {m.role === "assistant" && (
                               <button
                                 onClick={() => toggleSave(m)}
-                                className="absolute -right-8 top-2 opacity-0 transition-opacity group-hover:opacity-100"
+                                className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-background/60 px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-background hover:text-primary"
                                 aria-label={isSaved ? "Unsave" : "Save"}
                               >
                                 {isSaved ? (
-                                  <BookmarkCheck className="h-4 w-4 text-primary" />
+                                  <>
+                                    <BookmarkCheck className="h-3.5 w-3.5 text-primary" />
+                                    <span className="text-primary">Saved</span>
+                                  </>
                                 ) : (
-                                  <Bookmark className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                                  <>
+                                    <Bookmark className="h-3.5 w-3.5" />
+                                    <span>Save</span>
+                                  </>
                                 )}
                               </button>
                             )}
