@@ -7,12 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Send, Bookmark, BookmarkCheck, Bot, User, Plus, ArrowLeft,
-  GraduationCap, Building2, Bug, Lightbulb, Code, MessageCircle, CreditCard, Loader2, Trash2,
+  Send, Bookmark, BookmarkCheck, Bot, User, Plus, ArrowLeft, Menu,
+  GraduationCap, Building2, Bug, Lightbulb, Code, MessageCircle, CreditCard, Loader2, Trash2, Info,
 } from "lucide-react";
 
 const iconMap: Record<string, React.ElementType> = {
