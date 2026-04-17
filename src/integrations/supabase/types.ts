@@ -16,6 +16,9 @@ export type Database = {
     Tables: {
       ai_models: {
         Row: {
+          api_base_url: string | null
+          api_key_secret_name: string | null
+          api_model_name: string | null
           category: Database["public"]["Enums"]["model_category"]
           created_at: string
           credits_cost: number
@@ -25,9 +28,13 @@ export type Database = {
           is_active: boolean
           min_plan: Database["public"]["Enums"]["user_plan"]
           provider: string
+          provider_type: Database["public"]["Enums"]["provider_type"]
           updated_at: string
         }
         Insert: {
+          api_base_url?: string | null
+          api_key_secret_name?: string | null
+          api_model_name?: string | null
           category?: Database["public"]["Enums"]["model_category"]
           created_at?: string
           credits_cost?: number
@@ -37,9 +44,13 @@ export type Database = {
           is_active?: boolean
           min_plan?: Database["public"]["Enums"]["user_plan"]
           provider: string
+          provider_type?: Database["public"]["Enums"]["provider_type"]
           updated_at?: string
         }
         Update: {
+          api_base_url?: string | null
+          api_key_secret_name?: string | null
+          api_model_name?: string | null
           category?: Database["public"]["Enums"]["model_category"]
           created_at?: string
           credits_cost?: number
@@ -49,6 +60,7 @@ export type Database = {
           is_active?: boolean
           min_plan?: Database["public"]["Enums"]["user_plan"]
           provider?: string
+          provider_type?: Database["public"]["Enums"]["provider_type"]
           updated_at?: string
         }
         Relationships: []
@@ -587,6 +599,7 @@ export type Database = {
       payment_kind: "subscription" | "credit_pack"
       payment_method: "jazzcash" | "easypaisa" | "bank_transfer" | "whatsapp"
       payment_status: "pending" | "approved" | "rejected"
+      provider_type: "lovable" | "openai_compatible" | "anthropic"
       transaction_kind:
         | "signup_bonus"
         | "subscription_grant"
@@ -727,6 +740,7 @@ export const Constants = {
       payment_kind: ["subscription", "credit_pack"],
       payment_method: ["jazzcash", "easypaisa", "bank_transfer", "whatsapp"],
       payment_status: ["pending", "approved", "rejected"],
+      provider_type: ["lovable", "openai_compatible", "anthropic"],
       transaction_kind: [
         "signup_bonus",
         "subscription_grant",
