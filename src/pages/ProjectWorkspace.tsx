@@ -16,6 +16,19 @@ import {
   GraduationCap, Building2, Bug, Lightbulb, Code, MessageCircle, MessageSquare, CreditCard, Loader2, Trash2, Info,
 } from "lucide-react";
 import { creditsToMessages, DEFAULT_CREDITS_PER_MESSAGE } from "@/lib/credits";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+function getChatHealth(messages: Array<{ content: string }>) {
+  const count = messages.length;
+  const lastChars = messages.slice(-20).reduce((sum, m) => sum + (m.content?.length || 0), 0);
+  const score = count + lastChars / 2000;
+  if (score < 20) return { label: "Healthy", color: "bg-emerald-500", tone: "text-emerald-600 dark:text-emerald-400", level: "ok" as const };
+  if (score < 50) return { label: "Getting long", color: "bg-amber-500", tone: "text-amber-600 dark:text-amber-400", level: "warn" as const };
+  return { label: "Very long", color: "bg-red-500", tone: "text-red-600 dark:text-red-400", level: "danger" as const };
+}
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap, Building2, Bug, Lightbulb, Code, Bot,
@@ -53,7 +66,10 @@ export default function ProjectWorkspace() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [newAssistantId, setNewAssistantId] = useState<string>("");
+  const [chatTooLong, setChatTooLong] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const chatHealth = useMemo(() => getChatHealth(messages), [messages]);
 
   // Load project, assistants, conversations
   useEffect(() => {
@@ -138,6 +154,25 @@ export default function ProjectWorkspace() {
     toast.success("Conversation deleted");
   };
 
+  const startFreshConversation = async () => {
+    if (!user || !id) return;
+    const assistantId = currentConvo?.assistant_id || availableAssistants[0]?.id;
+    if (!assistantId) {
+      toast.error("Activate an assistant first.");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("conversations")
+      .insert({ user_id: user.id, project_id: id, assistant_id: assistantId, title: "New conversation" })
+      .select("id,title,assistant_id")
+      .single();
+    if (error) { toast.error(error.message); return; }
+    setConversations((prev) => [data as Conversation, ...prev]);
+    setSelectedConvoId(data.id);
+    setChatTooLong(false);
+    toast.success("Started a fresh chat");
+  };
+
   const handleSend = async () => {
     if (!input.trim() || !user || !selectedConvoId || sending) return;
     setSending(true);
@@ -195,8 +230,11 @@ export default function ProjectWorkspace() {
       // Refresh credits in header/sidebar
       await refreshProfile();
     } catch (err: any) {
-      const msg = err?.message || "AI request failed";
-      if (msg.includes("Insufficient")) {
+      const msg = err?.message || err?.context?.error || "AI request failed";
+      const errCode = err?.context?.error || (typeof err?.message === "string" && err.message);
+      if (msg === "chat_too_long" || errCode === "chat_too_long" || /chat_too_long/i.test(msg)) {
+        setChatTooLong(true);
+      } else if (msg.includes("Insufficient")) {
         toast.error("Out of credits", { description: "Top up to keep chatting." });
       } else if (msg.includes("Rate") || msg.includes("429")) {
         toast.error("Rate limited", { description: "Please wait a moment and try again." });
@@ -347,12 +385,34 @@ export default function ProjectWorkspace() {
                     <p className="truncate text-xs text-muted-foreground">{currentConvo?.title}</p>
                   </div>
                 </div>
-                <div className="hidden shrink-0 items-center gap-1.5 text-xs text-muted-foreground sm:flex">
-                  <MessageSquare className="h-3.5 w-3.5 text-primary" />
-                  <span className="font-medium text-foreground">
-                    ≈ {creditsToMessages(profile?.credits).toLocaleString()}
-                  </span>
-                  <span>left · {DEFAULT_CREDITS_PER_MESSAGE}/msg</span>
+                <div className="flex shrink-0 items-center gap-2">
+                  {messages.length > 6 && (
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2 py-1 text-xs">
+                            <span className={`h-2 w-2 rounded-full ${chatHealth.color}`} />
+                            <span className={`hidden sm:inline ${chatHealth.tone}`}>{chatHealth.label}</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs text-xs">
+                          Chat length affects AI memory and response quality. Long chats are auto-summarized in the background.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {chatHealth.level === "danger" && (
+                    <Button size="sm" variant="outline" onClick={startFreshConversation} className="h-7 px-2 text-xs">
+                      <Plus className="mr-1 h-3 w-3" /> New chat
+                    </Button>
+                  )}
+                  <div className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
+                    <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                    <span className="font-medium text-foreground">
+                      ≈ {creditsToMessages(profile?.credits).toLocaleString()}
+                    </span>
+                    <span>left · {DEFAULT_CREDITS_PER_MESSAGE}/msg</span>
+                  </div>
                 </div>
               </div>
 
@@ -486,6 +546,25 @@ export default function ProjectWorkspace() {
           )}
         </aside>
       </div>
+
+      <Dialog open={chatTooLong} onOpenChange={setChatTooLong}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>This chat is very long</DialogTitle>
+            <DialogDescription>
+              The conversation has grown beyond what the AI can comfortably handle. We've saved a summary of what was discussed — start a fresh chat to continue smoothly. Your context is preserved.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setChatTooLong(false)}>
+              Stay here
+            </Button>
+            <Button onClick={startFreshConversation}>
+              <Plus className="mr-1.5 h-4 w-4" /> Start new chat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
