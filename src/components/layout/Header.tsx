@@ -8,7 +8,7 @@ import logo from "@/assets/logo.png";
 const navLinks = [
   { label: "EduPro", href: "/#features" },
   { label: "Tools", href: "/assistants" },
-  { label: "Subscription Plans", href: "/pricing" },
+  { label: "Plans & Credits", href: "/buy-credits" },
   { label: "Member Pro", href: "/dashboard" },
 ];
 
