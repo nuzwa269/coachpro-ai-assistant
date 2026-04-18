@@ -22,7 +22,11 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 type Project = { id: string; name: string; description: string | null };
-type Assistant = { id: string; name: string; description: string | null; icon: string; category: string | null; is_prebuilt: boolean };
+type Assistant = {
+  id: string; name: string; description: string | null; icon: string;
+  category: string | null; is_prebuilt: boolean;
+  system_prompt: string; default_model_id: string | null;
+};
 type Conversation = { id: string; title: string; assistant_id: string };
 type Message = {
   id: string;
@@ -59,7 +63,7 @@ export default function ProjectWorkspace() {
       setLoading(true);
       const [projRes, assistRes, activeRes, convoRes, savedRes] = await Promise.all([
         supabase.from("projects").select("id,name,description").eq("id", id).maybeSingle(),
-        supabase.from("assistants").select("id,name,description,icon,category,is_prebuilt").eq("is_active", true),
+        supabase.from("assistants").select("id,name,description,icon,category,is_prebuilt,system_prompt,default_model_id").eq("is_active", true),
         supabase.from("user_active_assistants").select("assistant_id").eq("user_id", user.id),
         supabase.from("conversations").select("id,title,assistant_id").eq("project_id", id).order("updated_at", { ascending: false }),
         supabase.from("saved_responses").select("message_id").eq("user_id", user.id),
@@ -157,19 +161,52 @@ export default function ProjectWorkspace() {
       setConversations((prev) => prev.map((c) => c.id === selectedConvoId ? { ...c, title } : c));
     }
 
-    // Placeholder AI response (real AI in next step)
-    const aiContent = "This is a placeholder response. Real AI integration will be added in the next step using Lovable AI Gateway.";
-    const { data: aiMsg, error: aErr } = await supabase
-      .from("messages")
-      .insert({ conversation_id: selectedConvoId, user_id: user.id, role: "assistant", content: aiContent })
-      .select("id,role,content,created_at,conversation_id")
-      .single();
-    if (aErr) { toast.error(aErr.message); setSending(false); return; }
+    // Resolve assistant + model for this conversation
+    const convo = conversations.find((c) => c.id === selectedConvoId);
+    const assistant = assistants.find((a) => a.id === convo?.assistant_id);
+    const modelId = assistant?.default_model_id || "google/gemini-2.5-flash";
 
-    setMessages((prev) => [...prev, aiMsg as Message]);
-    await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", selectedConvoId);
-    setSending(false);
-    setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }), 50);
+    if (!assistant) {
+      toast.error("Assistant not found for this conversation");
+      setSending(false);
+      return;
+    }
+
+    // Build full message history for context (include the just-inserted user msg)
+    const history = [...messages, userMsg as Message].map((m) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    }));
+
+    try {
+      const { data, error } = await supabase.functions.invoke("chat-ai", {
+        body: {
+          conversation_id: selectedConvoId,
+          model_id: modelId,
+          messages: history,
+          system_prompt: assistant.system_prompt,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const aiMsg = data.message as Message;
+      setMessages((prev) => [...prev, aiMsg]);
+      // Refresh credits in header/sidebar
+      await refreshProfile();
+    } catch (err: any) {
+      const msg = err?.message || "AI request failed";
+      if (msg.includes("Insufficient")) {
+        toast.error("Out of credits", { description: "Top up to keep chatting." });
+      } else if (msg.includes("Rate") || msg.includes("429")) {
+        toast.error("Rate limited", { description: "Please wait a moment and try again." });
+      } else {
+        toast.error(msg);
+      }
+    } finally {
+      setSending(false);
+      setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }), 50);
+    }
   };
 
   const toggleSave = async (msg: Message) => {
