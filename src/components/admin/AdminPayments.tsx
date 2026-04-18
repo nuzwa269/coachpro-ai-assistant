@@ -116,14 +116,10 @@ export function AdminPayments() {
   const reject = async () => {
     if (!rejectTarget) return;
     setActing(rejectTarget.id);
-    const { error } = await supabase
-      .from("payment_requests")
-      .update({
-        status: "rejected",
-        admin_notes: rejectNotes || null,
-        reviewed_at: new Date().toISOString(),
-      })
-      .eq("id", rejectTarget.id);
+    const { error } = await supabase.rpc("reject_payment", {
+      _payment_id: rejectTarget.id,
+      _admin_notes: rejectNotes || null,
+    });
     setActing(null);
     if (error) {
       toast.error(error.message);
