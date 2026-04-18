@@ -8,7 +8,7 @@ import logo from "@/assets/logo.png";
 const navLinks = [
   { label: "EduPro", href: "/#features" },
   { label: "Tools", href: "/assistants" },
-  { label: "Subscription Plans", href: "/pricing" },
+  { label: "Plans & Credits", href: "/buy-credits" },
   { label: "Member Pro", href: "/dashboard" },
 ];
 
@@ -22,7 +22,7 @@ const authLinks = [
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const isLoggedIn = location.pathname !== "/" && location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/pricing";
+  const isLoggedIn = location.pathname !== "/" && location.pathname !== "/login" && location.pathname !== "/signup";
   const links = isLoggedIn ? authLinks : navLinks;
 
   return (
