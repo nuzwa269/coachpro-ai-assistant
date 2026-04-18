@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { subscriptionPlans, creditPacks } from "@/data/mock-data";
@@ -8,12 +7,13 @@ import { Check, Smartphone, Landmark, MessageCircle } from "lucide-react";
 
 export default function Pricing() {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container py-12">
-        <div className="mb-12 text-center">
-          <h1 className="font-heading text-4xl font-bold">Pricing Plans</h1>
-          <p className="mt-3 text-lg text-muted-foreground">Choose a plan that works for you. Start free, upgrade anytime.</p>
+    <AppShell>
+      <div className="container max-w-6xl py-8 md:py-12">
+        <div className="mb-10 text-center">
+          <h1 className="font-heading text-3xl font-bold md:text-4xl">Pricing Plans</h1>
+          <p className="mt-3 text-base text-muted-foreground md:text-lg">
+            Choose a plan that works for you. Start free, upgrade anytime.
+          </p>
         </div>
 
         {/* Subscription Plans */}
@@ -38,7 +38,9 @@ export default function Pricing() {
                   </span>
                   {plan.price > 0 && <span className="text-sm text-muted-foreground">/month</span>}
                 </div>
-                <p className="text-sm text-muted-foreground">{plan.credits} credits{plan.price > 0 ? "/month" : " on signup"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {plan.credits} credits{plan.price > 0 ? "/month" : " on signup"}
+                </p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
@@ -49,8 +51,12 @@ export default function Pricing() {
                     </li>
                   ))}
                 </ul>
-                <Button className="mt-6 w-full" variant={plan.popular ? "default" : "outline"} asChild>
-                  <Link to="/signup">{plan.price === 0 ? "Start Free" : "Subscribe"}</Link>
+                <Button
+                  className="mt-6 w-full"
+                  variant={plan.popular ? "default" : "outline"}
+                  asChild
+                >
+                  <Link to="/buy-credits">{plan.price === 0 ? "Current Plan" : "Subscribe"}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -67,7 +73,9 @@ export default function Pricing() {
                   <p className="font-heading text-lg font-semibold">{p.name}</p>
                   <p className="mt-1 text-3xl font-bold text-primary">{p.credits} Credits</p>
                   <p className="mt-1 text-muted-foreground">Rs {p.price}</p>
-                  <Button className="mt-4 w-full" variant="outline">Buy Now</Button>
+                  <Button className="mt-4 w-full" variant="outline" asChild>
+                    <Link to="/buy-credits">Buy Now</Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -75,16 +83,19 @@ export default function Pricing() {
         </div>
 
         {/* Payment Methods */}
-        <div className="mt-12 text-center">
+        <div className="mt-12 mb-8 text-center">
           <p className="mb-4 text-sm font-medium text-muted-foreground">Accepted Payment Methods</p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {[
               { icon: Smartphone, label: "JazzCash" },
               { icon: Smartphone, label: "Easypaisa" },
               { icon: Landmark, label: "Bank Transfer" },
               { icon: MessageCircle, label: "WhatsApp" },
             ].map((m) => (
-              <div key={m.label} className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm">
+              <div
+                key={m.label}
+                className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm"
+              >
                 <m.icon className="h-4 w-4 text-muted-foreground" />
                 {m.label}
               </div>
@@ -92,7 +103,6 @@ export default function Pricing() {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </AppShell>
   );
 }
