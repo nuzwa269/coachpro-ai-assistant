@@ -237,6 +237,11 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Pro upgrade nudge for free users */}
+        {!loading && isFreePlan && showProBanner && (
+          <ProBanner onDismiss={() => setShowProBanner(false)} />
+        )}
+
         {/* Chat box */}
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
           {/* Assistant selector chip */}
