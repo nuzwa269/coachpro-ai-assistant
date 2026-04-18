@@ -1,37 +1,39 @@
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { UserAvatarMenu } from "./UserAvatarMenu";
+import { MobileBottomNav } from "./MobileBottomNav";
 import { useAuth } from "@/contexts/AuthContext";
-import { Coins, Menu, X } from "lucide-react";
+import { Coins, MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import { creditsToMessages } from "@/lib/credits";
 
 interface AppShellProps {
   children: ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const { profile } = useAuth();
   const credits = profile?.credits ?? 0;
+  const messagesLeft = creditsToMessages(credits);
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background md:flex-row">
       {/* Mobile top bar */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4 md:hidden">
-        <img src={logo} alt="CoachPro AI" className="h-7 w-auto" />
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-            <Coins className="h-3 w-3" />
-            {credits}
-          </div>
-          <UserAvatarMenu size="sm" />
-          <button
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
-            className="rounded-md p-1.5 hover:bg-muted"
+        <Link to="/dashboard" className="flex items-center">
+          <img src={logo} alt="CoachPro AI" className="h-7 w-auto" />
+        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/buy-credits"
+            className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+            aria-label={`${messagesLeft} messages remaining, tap to buy credits`}
           >
-            <Menu className="h-5 w-5" />
-          </button>
+            <MessageSquare className="h-3 w-3" />
+            ≈ {messagesLeft.toLocaleString()}
+          </Link>
+          <UserAvatarMenu size="sm" />
         </div>
       </header>
 
@@ -39,26 +41,6 @@ export function AppShell({ children }: AppShellProps) {
       <div className="hidden md:block">
         <AppSidebar />
       </div>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            className="absolute inset-0 bg-foreground/40"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="absolute inset-y-0 left-0 w-72 max-w-[85%] shadow-xl">
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="absolute right-3 top-3 z-10 rounded-md p-1.5 hover:bg-muted"
-              aria-label="Close menu"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <AppSidebar mobileMode onNavigate={() => setMobileOpen(false)} />
-          </div>
-        </div>
-      )}
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Desktop top bar */}
@@ -72,8 +54,11 @@ export function AppShell({ children }: AppShellProps) {
             <UserAvatarMenu />
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto pb-[72px] md:pb-0">{children}</main>
       </div>
+
+      {/* Mobile bottom tab bar */}
+      <MobileBottomNav />
     </div>
   );
 }
