@@ -8,9 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Send, Sparkles, Bot, FolderOpen, Plus, Loader2, MessageSquare,
   GraduationCap, Building2, Bug, Lightbulb, Code, ArrowRight, AlertCircle,
+  Crown, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { creditsToMessages, costLabel, DEFAULT_CREDITS_PER_MESSAGE } from "@/lib/credits";
+import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap, Building2, Bug, Lightbulb, Code, Bot,
@@ -39,6 +41,42 @@ const SUGGESTED_PROMPTS = [
   "What's the difference between SQL and NoSQL?",
 ];
 
+function ProBanner({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-background p-4 shadow-sm">
+      <button
+        onClick={onDismiss}
+        className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        aria-label="Dismiss"
+      >
+        <X className="h-4 w-4" />
+      </button>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3 sm:items-center">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20">
+            <Crown className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="font-heading text-sm font-semibold text-foreground sm:text-base">
+              Unlock Pro Power
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+              GPT-5 · Claude · 5,000 credits/mo · Unlimited assistants
+            </p>
+          </div>
+        </div>
+        <Button
+          size="sm"
+          className="h-9 shrink-0 gap-1.5 text-xs sm:h-10 sm:px-4"
+          onClick={() => window.location.href = "/pricing"}
+        >
+          Upgrade <ArrowRight className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
@@ -50,6 +88,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [showProBanner, setShowProBanner] = useState(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Load projects, assistants, and active assistants in parallel
@@ -109,6 +148,7 @@ export default function Dashboard() {
   const SelectedIcon = selectedAssistant ? iconMap[selectedAssistant.icon] || Bot : Bot;
 
   const displayName = profile?.name || profile?.email?.split("@")[0] || "there";
+  const isFreePlan = profile?.plan === "free";
 
   const handleSend = async (overrideText?: string) => {
     const content = (overrideText ?? input).trim();
@@ -196,6 +236,11 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
+
+        {/* Pro upgrade nudge for free users */}
+        {!loading && isFreePlan && showProBanner && (
+          <ProBanner onDismiss={() => setShowProBanner(false)} />
+        )}
 
         {/* Chat box */}
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
