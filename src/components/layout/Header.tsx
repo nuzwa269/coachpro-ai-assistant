@@ -22,7 +22,7 @@ const authLinks = [
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const isLoggedIn = location.pathname !== "/" && location.pathname !== "/login" && location.pathname !== "/signup" && location.pathname !== "/pricing";
+  const isLoggedIn = location.pathname !== "/" && location.pathname !== "/login" && location.pathname !== "/signup";
   const links = isLoggedIn ? authLinks : navLinks;
 
   return (
