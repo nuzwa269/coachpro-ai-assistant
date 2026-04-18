@@ -118,6 +118,41 @@ export type Database = {
           },
         ]
       }
+      conversation_summaries: {
+        Row: {
+          conversation_id: string
+          durable_facts: string
+          message_count_at_summary: number
+          summarized_up_to_message_id: string | null
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          conversation_id: string
+          durable_facts?: string
+          message_count_at_summary?: number
+          summarized_up_to_message_id?: string | null
+          summary?: string
+          updated_at?: string
+        }
+        Update: {
+          conversation_id?: string
+          durable_facts?: string
+          message_count_at_summary?: number
+          summarized_up_to_message_id?: string | null
+          summary?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_summaries_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: true
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           assistant_id: string
