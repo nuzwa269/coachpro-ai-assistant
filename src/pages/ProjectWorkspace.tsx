@@ -546,6 +546,25 @@ export default function ProjectWorkspace() {
           )}
         </aside>
       </div>
+
+      <Dialog open={chatTooLong} onOpenChange={setChatTooLong}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>This chat is very long</DialogTitle>
+            <DialogDescription>
+              The conversation has grown beyond what the AI can comfortably handle. We've saved a summary of what was discussed — start a fresh chat to continue smoothly. Your context is preserved.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setChatTooLong(false)}>
+              Stay here
+            </Button>
+            <Button onClick={startFreshConversation}>
+              <Plus className="mr-1.5 h-4 w-4" /> Start new chat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
