@@ -1,11 +1,10 @@
 import { NavLink, useNavigate, Link } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, Bot, Bookmark, Coins, Settings, LogOut, Shield, MessageSquare, Sparkles, Crown } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Bot, Bookmark, Coins, Settings, LogOut, Shield, MessageSquare } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { creditsToMessages } from "@/lib/credits";
-import { Button } from "@/components/ui/button";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
@@ -19,42 +18,6 @@ const navItems = [
 interface AppSidebarProps {
   mobileMode?: boolean;
   onNavigate?: () => void;
-}
-
-function UpgradeCard({ onNavigate }: { onNavigate?: () => void }) {
-  return (
-    <Link
-      to="/pricing"
-      onClick={onNavigate}
-      className="block rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 p-3 transition-all hover:border-primary/50 hover:shadow-sm"
-    >
-      <div className="flex items-start gap-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/20">
-          <Crown className="h-4 w-4 text-primary" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold text-foreground">Unlock Pro</p>
-          <ul className="mt-1 space-y-0.5 text-[11px] text-muted-foreground">
-            <li className="flex items-center gap-1">
-              <Sparkles className="h-3 w-3 text-primary" />
-              GPT-5 & Claude access
-            </li>
-            <li className="flex items-center gap-1">
-              <Coins className="h-3 w-3 text-primary" />
-              5,000 credits/mo
-            </li>
-            <li className="flex items-center gap-1">
-              <Bot className="h-3 w-3 text-primary" />
-              Unlimited assistants
-            </li>
-          </ul>
-          <Button size="sm" className="mt-2 h-7 w-full text-xs">
-            Upgrade Now
-          </Button>
-        </div>
-      </div>
-    </Link>
-  );
 }
 
 export function AppSidebar({ mobileMode = false, onNavigate }: AppSidebarProps) {
@@ -115,7 +78,6 @@ export function AppSidebar({ mobileMode = false, onNavigate }: AppSidebarProps) 
         </nav>
 
         <div className="space-y-2 border-t border-border p-3">
-          {isFreePlan && <UpgradeCard onNavigate={onNavigate} />}
           
           <Link
             to="/buy-credits"
