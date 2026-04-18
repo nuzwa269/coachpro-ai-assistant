@@ -306,6 +306,9 @@ export type Database = {
           sender_name: string | null
           sender_phone: string | null
           status: Database["public"]["Enums"]["payment_status"]
+          trial_credits_amount: number
+          trial_credits_granted_at: string | null
+          trial_credits_reverted: boolean
           user_id: string
         }
         Insert: {
@@ -325,6 +328,9 @@ export type Database = {
           sender_name?: string | null
           sender_phone?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
+          trial_credits_amount?: number
+          trial_credits_granted_at?: string | null
+          trial_credits_reverted?: boolean
           user_id: string
         }
         Update: {
@@ -344,6 +350,9 @@ export type Database = {
           sender_name?: string | null
           sender_phone?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
+          trial_credits_amount?: number
+          trial_credits_granted_at?: string | null
+          trial_credits_reverted?: boolean
           user_id?: string
         }
         Relationships: [
@@ -585,12 +594,17 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_plan"]
       }
+      grant_trial_credits: { Args: { _payment_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      reject_payment: {
+        Args: { _admin_notes?: string; _payment_id: string }
+        Returns: undefined
       }
     }
     Enums: {
@@ -607,6 +621,8 @@ export type Database = {
         | "message_deduct"
         | "admin_adjust"
         | "refund"
+        | "trial_grant"
+        | "trial_revert"
       user_plan: "free" | "basic" | "pro"
     }
     CompositeTypes: {
@@ -748,6 +764,8 @@ export const Constants = {
         "message_deduct",
         "admin_adjust",
         "refund",
+        "trial_grant",
+        "trial_revert",
       ],
       user_plan: ["free", "basic", "pro"],
     },
