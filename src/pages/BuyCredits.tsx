@@ -162,14 +162,35 @@ export default function BuyCredits() {
       if (selection.kind === "credit_pack") payload.pack_id = selection.id;
       else payload.plan_id = selection.id;
 
-      const { error } = await supabase.from("payment_requests").insert(payload);
+      const { data: inserted, error } = await supabase
+        .from("payment_requests")
+        .insert(payload)
+        .select("id")
+        .single();
       if (error) throw error;
 
-      toast.success("Payment submitted", { description: "We'll verify and add credits within 24 hours." });
+      // Try to grant instant trial credits (lifetime once, free plan only)
+      let trialGranted = 0;
+      if (inserted?.id) {
+        const { data: granted } = await supabase.rpc("grant_trial_credits", { _payment_id: inserted.id });
+        trialGranted = (granted as number) ?? 0;
+      }
+
+      if (trialGranted > 0) {
+        toast.success(`Payment submitted · ${trialGranted} trial credits added!`, {
+          description: "Keep building while we verify your payment (usually within 24h).",
+        });
+      } else {
+        toast.success("Payment submitted", {
+          description: "We'll verify and add credits within 24 hours.",
+        });
+      }
+
       setReference(""); setNotes(""); setProofFile(null);
       const fileInput = document.getElementById("proof") as HTMLInputElement | null;
       if (fileInput) fileInput.value = "";
-      refreshProfile();
+      await refreshProfile();
+      await loadRecent(user.id);
     } catch (err: any) {
       toast.error("Submission failed", { description: err.message });
     } finally {
