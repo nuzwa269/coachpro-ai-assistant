@@ -36,7 +36,7 @@ type Message = {
 export default function ProjectWorkspace() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
 
   const [project, setProject] = useState<Project | null>(null);
   const [assistants, setAssistants] = useState<Assistant[]>([]);
@@ -311,7 +311,11 @@ export default function ProjectWorkspace() {
                   </div>
                 </div>
                 <div className="hidden shrink-0 items-center gap-1.5 text-xs text-muted-foreground sm:flex">
-                  <CreditCard className="h-3.5 w-3.5" /> 1 credit / msg
+                  <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                  <span className="font-medium text-foreground">
+                    ≈ {creditsToMessages(profile?.credits).toLocaleString()}
+                  </span>
+                  <span>left · {DEFAULT_CREDITS_PER_MESSAGE}/msg</span>
                 </div>
               </div>
 
