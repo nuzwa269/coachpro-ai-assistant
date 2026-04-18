@@ -154,6 +154,25 @@ export default function ProjectWorkspace() {
     toast.success("Conversation deleted");
   };
 
+  const startFreshConversation = async () => {
+    if (!user || !id) return;
+    const assistantId = currentConvo?.assistant_id || availableAssistants[0]?.id;
+    if (!assistantId) {
+      toast.error("Activate an assistant first.");
+      return;
+    }
+    const { data, error } = await supabase
+      .from("conversations")
+      .insert({ user_id: user.id, project_id: id, assistant_id: assistantId, title: "New conversation" })
+      .select("id,title,assistant_id")
+      .single();
+    if (error) { toast.error(error.message); return; }
+    setConversations((prev) => [data as Conversation, ...prev]);
+    setSelectedConvoId(data.id);
+    setChatTooLong(false);
+    toast.success("Started a fresh chat");
+  };
+
   const handleSend = async () => {
     if (!input.trim() || !user || !selectedConvoId || sending) return;
     setSending(true);
