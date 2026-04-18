@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Coins, Copy, Zap, Check, Loader2, Upload, Crown, MessageSquare } from "lucide-react";
+import { Coins, Copy, Zap, Check, Loader2, Upload, Crown, MessageSquare, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { creditsToMessages } from "@/lib/credits";
+import { PaymentTimeline, type TimelinePayment } from "@/components/PaymentTimeline";
 
 type Pack = { id: string; name: string; credits: number; price_pkr: number; is_popular: boolean };
 type Plan = { id: string; name: string; monthly_credits: number; price_pkr: number; is_popular: boolean };
