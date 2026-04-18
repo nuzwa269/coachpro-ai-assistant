@@ -88,6 +88,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [showProBanner, setShowProBanner] = useState(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Load projects, assistants, and active assistants in parallel
@@ -147,6 +148,7 @@ export default function Dashboard() {
   const SelectedIcon = selectedAssistant ? iconMap[selectedAssistant.icon] || Bot : Bot;
 
   const displayName = profile?.name || profile?.email?.split("@")[0] || "there";
+  const isFreePlan = profile?.plan === "free";
 
   const handleSend = async (overrideText?: string) => {
     const content = (overrideText ?? input).trim();
