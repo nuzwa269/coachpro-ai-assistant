@@ -16,6 +16,19 @@ import {
   GraduationCap, Building2, Bug, Lightbulb, Code, MessageCircle, MessageSquare, CreditCard, Loader2, Trash2, Info,
 } from "lucide-react";
 import { creditsToMessages, DEFAULT_CREDITS_PER_MESSAGE } from "@/lib/credits";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+function getChatHealth(messages: Array<{ content: string }>) {
+  const count = messages.length;
+  const lastChars = messages.slice(-20).reduce((sum, m) => sum + (m.content?.length || 0), 0);
+  const score = count + lastChars / 2000;
+  if (score < 20) return { label: "Healthy", color: "bg-emerald-500", tone: "text-emerald-600 dark:text-emerald-400", level: "ok" as const };
+  if (score < 50) return { label: "Getting long", color: "bg-amber-500", tone: "text-amber-600 dark:text-amber-400", level: "warn" as const };
+  return { label: "Very long", color: "bg-red-500", tone: "text-red-600 dark:text-red-400", level: "danger" as const };
+}
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap, Building2, Bug, Lightbulb, Code, Bot,
