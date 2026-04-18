@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Coins, Copy, Zap, Check, Loader2, Upload, Crown, MessageSquare } from "lucide-react";
+import { Coins, Copy, Zap, Check, Loader2, Upload, Crown, MessageSquare, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { creditsToMessages } from "@/lib/credits";
+import { PaymentTimeline, type TimelinePayment } from "@/components/PaymentTimeline";
 
 type Pack = { id: string; name: string; credits: number; price_pkr: number; is_popular: boolean };
 type Plan = { id: string; name: string; monthly_credits: number; price_pkr: number; is_popular: boolean };
@@ -38,6 +39,36 @@ export default function BuyCredits() {
   const [notes, setNotes] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [recent, setRecent] = useState<TimelinePayment[]>([]);
+
+  const loadRecent = async (uid: string) => {
+    const { data: pays } = await supabase
+      .from("payment_requests")
+      .select("id,status,created_at,reviewed_at,amount_pkr,kind,trial_credits_granted_at,trial_credits_amount,trial_credits_reverted,admin_notes,pack_id,plan_id")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    if (!pays) return;
+    const packIds = [...new Set(pays.map((p: any) => p.pack_id).filter(Boolean) as string[])];
+    const planIds = [...new Set(pays.map((p: any) => p.plan_id).filter(Boolean) as string[])];
+    const [{ data: pks }, { data: pls }] = await Promise.all([
+      packIds.length
+        ? supabase.from("credit_packs").select("id,name").in("id", packIds)
+        : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+      planIds.length
+        ? supabase.from("subscription_plans").select("id,name").in("id", planIds)
+        : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+    ]);
+    const pkMap = new Map((pks ?? []).map((p) => [p.id, p.name]));
+    const plMap = new Map((pls ?? []).map((p) => [p.id, p.name]));
+    setRecent(
+      pays.map((p: any) => ({
+        ...p,
+        pack_name: p.pack_id ? pkMap.get(p.pack_id) : null,
+        plan_name: p.plan_id ? plMap.get(p.plan_id) : null,
+      })) as TimelinePayment[],
+    );
+  };
 
   useEffect(() => {
     (async () => {
@@ -52,9 +83,40 @@ export default function BuyCredits() {
       if (popularPack) {
         setSelection({ kind: "credit_pack", id: popularPack.id, name: popularPack.name, amount: popularPack.price_pkr });
       }
+      if (user) await loadRecent(user.id);
       setLoading(false);
     })();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  // Realtime: live status updates on this user's payment requests
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`payments:${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "payment_requests", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          loadRecent(user.id);
+          const newRow: any = payload.new;
+          const oldRow: any = payload.old;
+          if (oldRow?.status === "pending" && newRow?.status === "approved") {
+            toast.success("Payment approved! Credits added 🎉");
+            refreshProfile();
+          } else if (oldRow?.status === "pending" && newRow?.status === "rejected") {
+            toast.error("Payment rejected", {
+              description: newRow.admin_notes || "Check the timeline for details.",
+            });
+            refreshProfile();
+          }
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, refreshProfile]);
 
   useEffect(() => {
     if (user && !senderName && profile?.name) setSenderName(profile.name);
@@ -100,14 +162,35 @@ export default function BuyCredits() {
       if (selection.kind === "credit_pack") payload.pack_id = selection.id;
       else payload.plan_id = selection.id;
 
-      const { error } = await supabase.from("payment_requests").insert(payload);
+      const { data: inserted, error } = await supabase
+        .from("payment_requests")
+        .insert(payload)
+        .select("id")
+        .single();
       if (error) throw error;
 
-      toast.success("Payment submitted", { description: "We'll verify and add credits within 24 hours." });
+      // Try to grant instant trial credits (lifetime once, free plan only)
+      let trialGranted = 0;
+      if (inserted?.id) {
+        const { data: granted } = await supabase.rpc("grant_trial_credits", { _payment_id: inserted.id });
+        trialGranted = (granted as number) ?? 0;
+      }
+
+      if (trialGranted > 0) {
+        toast.success(`Payment submitted · ${trialGranted} trial credits added!`, {
+          description: "Keep building while we verify your payment (usually within 24h).",
+        });
+      } else {
+        toast.success("Payment submitted", {
+          description: "We'll verify and add credits within 24 hours.",
+        });
+      }
+
       setReference(""); setNotes(""); setProofFile(null);
       const fileInput = document.getElementById("proof") as HTMLInputElement | null;
       if (fileInput) fileInput.value = "";
-      refreshProfile();
+      await refreshProfile();
+      await loadRecent(user.id);
     } catch (err: any) {
       toast.error("Submission failed", { description: err.message });
     } finally {
@@ -145,6 +228,35 @@ export default function BuyCredits() {
             )}
           </div>
         </div>
+
+        {/* Trial credits hint */}
+        {profile?.plan === "free" &&
+          !recent.some((r) => r.trial_credits_granted_at) &&
+          (profile?.credits ?? 0) < 50 && (
+            <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div className="text-sm">
+                <p className="font-semibold text-foreground">
+                  Get 50 free trial credits the moment you submit payment proof
+                </p>
+                <p className="mt-0.5 text-muted-foreground">
+                  Keep working while we verify — no waiting. One-time per account.
+                </p>
+              </div>
+            </div>
+          )}
+
+        {/* My Payments timeline */}
+        {recent.length > 0 && (
+          <section>
+            <h2 className="mb-4 font-heading text-lg font-bold text-foreground">My Recent Payments</h2>
+            <div className="grid gap-4 lg:grid-cols-2">
+              {recent.map((p) => (
+                <PaymentTimeline key={p.id} payment={p} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Credit Packs */}
         <section>
