@@ -13,8 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Send, Bookmark, BookmarkCheck, Bot, User, Plus, ArrowLeft, Menu,
-  GraduationCap, Building2, Bug, Lightbulb, Code, MessageCircle, CreditCard, Loader2, Trash2, Info,
+  GraduationCap, Building2, Bug, Lightbulb, Code, MessageCircle, MessageSquare, CreditCard, Loader2, Trash2, Info,
 } from "lucide-react";
+import { creditsToMessages, DEFAULT_CREDITS_PER_MESSAGE } from "@/lib/credits";
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap, Building2, Bug, Lightbulb, Code, Bot,
