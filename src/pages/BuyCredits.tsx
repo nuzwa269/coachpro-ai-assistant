@@ -229,6 +229,35 @@ export default function BuyCredits() {
           </div>
         </div>
 
+        {/* Trial credits hint */}
+        {profile?.plan === "free" &&
+          !recent.some((r) => r.trial_credits_granted_at) &&
+          (profile?.credits ?? 0) < 50 && (
+            <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div className="text-sm">
+                <p className="font-semibold text-foreground">
+                  Get 50 free trial credits the moment you submit payment proof
+                </p>
+                <p className="mt-0.5 text-muted-foreground">
+                  Keep working while we verify — no waiting. One-time per account.
+                </p>
+              </div>
+            </div>
+          )}
+
+        {/* My Payments timeline */}
+        {recent.length > 0 && (
+          <section>
+            <h2 className="mb-4 font-heading text-lg font-bold text-foreground">My Recent Payments</h2>
+            <div className="grid gap-4 lg:grid-cols-2">
+              {recent.map((p) => (
+                <PaymentTimeline key={p.id} payment={p} />
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Credit Packs */}
         <section>
           <h2 className="mb-4 font-heading text-lg font-bold text-foreground">Credit Packs (one-time)</h2>
