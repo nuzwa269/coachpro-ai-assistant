@@ -211,8 +211,11 @@ export default function ProjectWorkspace() {
       // Refresh credits in header/sidebar
       await refreshProfile();
     } catch (err: any) {
-      const msg = err?.message || "AI request failed";
-      if (msg.includes("Insufficient")) {
+      const msg = err?.message || err?.context?.error || "AI request failed";
+      const errCode = err?.context?.error || (typeof err?.message === "string" && err.message);
+      if (msg === "chat_too_long" || errCode === "chat_too_long" || /chat_too_long/i.test(msg)) {
+        setChatTooLong(true);
+      } else if (msg.includes("Insufficient")) {
         toast.error("Out of credits", { description: "Top up to keep chatting." });
       } else if (msg.includes("Rate") || msg.includes("429")) {
         toast.error("Rate limited", { description: "Please wait a moment and try again." });
