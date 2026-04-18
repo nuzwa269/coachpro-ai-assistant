@@ -8,9 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Send, Sparkles, Bot, FolderOpen, Plus, Loader2, MessageSquare,
   GraduationCap, Building2, Bug, Lightbulb, Code, ArrowRight, AlertCircle,
+  Crown, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { creditsToMessages, costLabel, DEFAULT_CREDITS_PER_MESSAGE } from "@/lib/credits";
+import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap, Building2, Bug, Lightbulb, Code, Bot,
