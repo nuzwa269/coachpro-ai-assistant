@@ -1,11 +1,10 @@
 import { NavLink, useNavigate, Link } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, Bot, Bookmark, Coins, Settings, LogOut, Shield, MessageSquare, Sparkles, Crown } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Bot, Bookmark, Coins, Settings, LogOut, Shield, MessageSquare } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { creditsToMessages } from "@/lib/credits";
-import { Button } from "@/components/ui/button";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
