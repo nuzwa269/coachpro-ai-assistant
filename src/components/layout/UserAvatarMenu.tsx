@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Coins, Crown, LogOut, Settings as SettingsIcon } from "lucide-react";
+import { Coins, Crown, LogOut, MessageSquare, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { creditsToMessages } from "@/lib/credits";
 
 interface UserAvatarMenuProps {
   size?: "sm" | "md";
@@ -91,9 +92,17 @@ export function UserAvatarMenu({ size = "md", className }: UserAvatarMenuProps) 
         <div className="space-y-1 px-2 py-1.5">
           <div className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm">
             <span className="flex items-center gap-2 text-muted-foreground">
-              <Coins className="h-3.5 w-3.5 text-primary" /> Credits
+              <MessageSquare className="h-3.5 w-3.5 text-primary" /> Messages left
             </span>
-            <span className="font-semibold text-foreground">{profile?.credits ?? 0}</span>
+            <span className="font-semibold text-foreground">
+              ≈ {creditsToMessages(profile?.credits).toLocaleString()}
+            </span>
+          </div>
+          <div className="flex items-center justify-between rounded-md px-2 py-1.5 text-xs text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <Coins className="h-3 w-3" /> Credits
+            </span>
+            <span className="font-medium">{profile?.credits ?? 0}</span>
           </div>
           <div className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm">
             <span className="flex items-center gap-2 text-muted-foreground">

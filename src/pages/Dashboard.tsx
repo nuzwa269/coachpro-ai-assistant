@@ -6,10 +6,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Send, Sparkles, Bot, FolderOpen, Plus, Loader2,
-  GraduationCap, Building2, Bug, Lightbulb, Code, ArrowRight,
+  Send, Sparkles, Bot, FolderOpen, Plus, Loader2, MessageSquare,
+  GraduationCap, Building2, Bug, Lightbulb, Code, ArrowRight, AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { creditsToMessages, costLabel, DEFAULT_CREDITS_PER_MESSAGE } from "@/lib/credits";
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap, Building2, Bug, Lightbulb, Code, Bot,
@@ -262,15 +263,21 @@ export default function Dashboard() {
             disabled={sending || !selectedAssistantId}
           />
 
-          <div className="mt-3 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {selectedAssistant && (
-                <>
+                <span className="inline-flex items-center gap-1.5">
                   <SelectedIcon className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">~1 credit / message</span>
-                  <span className="sm:hidden">1 credit</span>
-                </>
+                  {costLabel(DEFAULT_CREDITS_PER_MESSAGE)}
+                </span>
               )}
+              <span className="inline-flex items-center gap-1.5">
+                <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                <span className="font-medium text-foreground">
+                  ≈ {creditsToMessages(profile?.credits).toLocaleString()}
+                </span>
+                <span className="hidden xs:inline">left</span>
+              </span>
             </div>
             <Button
               onClick={() => handleSend()}
@@ -289,6 +296,25 @@ export default function Dashboard() {
             </Button>
           </div>
         </div>
+
+        {/* Low-credits non-blocking banner */}
+        {!loading && (profile?.credits ?? 0) <= 5 && (
+          <Link
+            to="/buy-credits"
+            className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm transition-colors hover:bg-primary/10"
+          >
+            <AlertCircle className="h-4 w-4 shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-foreground">
+                Running low — only ≈ {creditsToMessages(profile?.credits)} messages left
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                Top up credits to keep chatting without interruption.
+              </p>
+            </div>
+            <ArrowRight className="h-4 w-4 shrink-0 text-primary" />
+          </Link>
+        )}
 
         {/* Suggested prompts (only for first-time / empty users) */}
         {!loading && projects.length === 0 && (

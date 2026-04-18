@@ -13,8 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Send, Bookmark, BookmarkCheck, Bot, User, Plus, ArrowLeft, Menu,
-  GraduationCap, Building2, Bug, Lightbulb, Code, MessageCircle, CreditCard, Loader2, Trash2, Info,
+  GraduationCap, Building2, Bug, Lightbulb, Code, MessageCircle, MessageSquare, CreditCard, Loader2, Trash2, Info,
 } from "lucide-react";
+import { creditsToMessages, DEFAULT_CREDITS_PER_MESSAGE } from "@/lib/credits";
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap, Building2, Bug, Lightbulb, Code, Bot,
@@ -35,7 +36,7 @@ type Message = {
 export default function ProjectWorkspace() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
 
   const [project, setProject] = useState<Project | null>(null);
   const [assistants, setAssistants] = useState<Assistant[]>([]);
@@ -310,7 +311,11 @@ export default function ProjectWorkspace() {
                   </div>
                 </div>
                 <div className="hidden shrink-0 items-center gap-1.5 text-xs text-muted-foreground sm:flex">
-                  <CreditCard className="h-3.5 w-3.5" /> 1 credit / msg
+                  <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                  <span className="font-medium text-foreground">
+                    ≈ {creditsToMessages(profile?.credits).toLocaleString()}
+                  </span>
+                  <span>left · {DEFAULT_CREDITS_PER_MESSAGE}/msg</span>
                 </div>
               </div>
 

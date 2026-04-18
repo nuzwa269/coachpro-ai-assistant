@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Coins, Copy, Zap, Check, Loader2, Upload, Crown } from "lucide-react";
+import { Coins, Copy, Zap, Check, Loader2, Upload, Crown, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { creditsToMessages } from "@/lib/credits";
 
 type Pack = { id: string; name: string; credits: number; price_pkr: number; is_popular: boolean };
 type Plan = { id: string; name: string; monthly_credits: number; price_pkr: number; is_popular: boolean };
@@ -127,10 +128,22 @@ export default function BuyCredits() {
       <div className="w-full space-y-8 p-4 sm:p-6">
         <div>
           <h1 className="font-heading text-2xl font-bold text-foreground sm:text-3xl">Buy Credits & Plans</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Current balance: <span className="font-semibold text-foreground">{profile?.credits ?? 0} credits</span>
-            {profile?.plan && <> • Plan: <span className="font-semibold text-foreground capitalize">{profile.plan}</span></>}
-          </p>
+          <div className="mt-3 inline-flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm">
+            <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+              <MessageSquare className="h-4 w-4 text-primary" />
+              ≈ {creditsToMessages(profile?.credits).toLocaleString()} messages left
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Coins className="h-3.5 w-3.5" />
+              {profile?.credits ?? 0} credits
+            </span>
+            {profile?.plan && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Crown className="h-3.5 w-3.5" />
+                <span className="capitalize">{profile.plan}</span> plan
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Credit Packs */}
@@ -156,11 +169,13 @@ export default function BuyCredits() {
                   <p className="text-sm font-semibold text-foreground">{p.name}</p>
                   <p className="mt-2 font-heading text-3xl font-bold text-foreground">Rs.{p.price_pkr.toLocaleString()}</p>
                   <div className="mt-4 flex items-center gap-2 text-sm text-foreground">
-                    <Coins className="h-4 w-4 text-primary" />
-                    <span className="font-semibold">{p.credits}</span>
-                    <span className="text-muted-foreground">AI credits</span>
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                    <span className="font-semibold">≈ {creditsToMessages(p.credits).toLocaleString()}</span>
+                    <span className="text-muted-foreground">messages</span>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">Rs.{(p.price_pkr / p.credits).toFixed(2)} per credit</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {p.credits.toLocaleString()} credits · Rs.{(p.price_pkr / p.credits).toFixed(2)} each
+                  </p>
                   <div className={`mt-4 flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
                     active ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
                   }`}>
@@ -198,10 +213,13 @@ export default function BuyCredits() {
                       Rs.{p.price_pkr.toLocaleString()}<span className="text-base font-normal text-muted-foreground">/mo</span>
                     </p>
                     <div className="mt-4 flex items-center gap-2 text-sm text-foreground">
-                      <Coins className="h-4 w-4 text-primary" />
-                      <span className="font-semibold">{p.monthly_credits}</span>
-                      <span className="text-muted-foreground">credits / month</span>
+                      <MessageSquare className="h-4 w-4 text-primary" />
+                      <span className="font-semibold">≈ {creditsToMessages(p.monthly_credits).toLocaleString()}</span>
+                      <span className="text-muted-foreground">messages / month</span>
                     </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {p.monthly_credits.toLocaleString()} credits / month
+                    </p>
                     <div className={`mt-4 flex h-10 w-full items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
                       active ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
                     }`}>
