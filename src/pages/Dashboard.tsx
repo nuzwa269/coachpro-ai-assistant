@@ -1,15 +1,28 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, FolderOpen, Sparkles, Bot } from "lucide-react";
+import {
+  Send, Sparkles, Bot, FolderOpen, Plus, Loader2,
+  GraduationCap, Building2, Bug, Lightbulb, Code, ArrowRight,
+} from "lucide-react";
 import { toast } from "sonner";
+
+const iconMap: Record<string, React.ElementType> = {
+  GraduationCap, Building2, Bug, Lightbulb, Code, Bot,
+};
+
+type Assistant = {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: string;
+  category: string | null;
+  is_prebuilt: boolean;
+};
 
 type ProjectRow = {
   id: string;
@@ -18,161 +31,324 @@ type ProjectRow = {
   created_at: string;
 };
 
+const SUGGESTED_PROMPTS = [
+  "Explain how databases work in simple terms",
+  "Help me design a REST API for a todo app",
+  "Walk me through deploying a Next.js app",
+  "What's the difference between SQL and NoSQL?",
+];
+
 export default function Dashboard() {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<ProjectRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newName, setNewName] = useState("");
-  const [newDesc, setNewDesc] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
 
+  const [projects, setProjects] = useState<ProjectRow[]>([]);
+  const [assistants, setAssistants] = useState<Assistant[]>([]);
+  const [activeAssistantIds, setActiveAssistantIds] = useState<Set<string>>(new Set());
+  const [selectedAssistantId, setSelectedAssistantId] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load projects, assistants, and active assistants in parallel
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("projects")
-      .select("id,name,description,created_at")
-      .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) toast.error(error.message);
-        else setProjects(data ?? []);
-        setLoading(false);
-      });
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const [projRes, assistRes, activeRes] = await Promise.all([
+        supabase
+          .from("projects")
+          .select("id,name,description,created_at")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("assistants")
+          .select("id,name,description,icon,category,is_prebuilt")
+          .eq("is_active", true),
+        supabase
+          .from("user_active_assistants")
+          .select("assistant_id")
+          .eq("user_id", user.id),
+      ]);
+      if (cancelled) return;
+      if (projRes.error) toast.error(projRes.error.message);
+      setProjects((projRes.data as ProjectRow[]) ?? []);
+      setAssistants((assistRes.data as Assistant[]) ?? []);
+      const activeSet = new Set(
+        ((activeRes.data as { assistant_id: string }[]) ?? []).map((a) => a.assistant_id),
+      );
+      setActiveAssistantIds(activeSet);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
   }, [user]);
 
-  const handleCreate = async () => {
-    if (!newName.trim() || !user) return;
-    setCreating(true);
-    const { data, error } = await supabase
-      .from("projects")
-      .insert({ name: newName.trim(), description: newDesc.trim() || null, user_id: user.id })
-      .select("id,name,description,created_at")
-      .single();
-    setCreating(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+  // Pick a sensible default assistant: first active prebuilt, else first prebuilt, else first owned
+  const usableAssistants = useMemo(() => {
+    const active = assistants.filter((a) => a.is_prebuilt && activeAssistantIds.has(a.id));
+    const ownedCustom = assistants.filter((a) => !a.is_prebuilt);
+    const allPrebuilt = assistants.filter((a) => a.is_prebuilt);
+    // Order: active prebuilt → custom → other prebuilt
+    const seen = new Set<string>();
+    return [...active, ...ownedCustom, ...allPrebuilt].filter((a) => {
+      if (seen.has(a.id)) return false;
+      seen.add(a.id);
+      return true;
+    });
+  }, [assistants, activeAssistantIds]);
+
+  useEffect(() => {
+    if (!selectedAssistantId && usableAssistants.length > 0) {
+      setSelectedAssistantId(usableAssistants[0].id);
     }
-    setProjects([data, ...projects]);
-    setNewName("");
-    setNewDesc("");
-    setDialogOpen(false);
-    toast.success("Project created");
-  };
+  }, [usableAssistants, selectedAssistantId]);
+
+  const selectedAssistant = assistants.find((a) => a.id === selectedAssistantId);
+  const SelectedIcon = selectedAssistant ? iconMap[selectedAssistant.icon] || Bot : Bot;
 
   const displayName = profile?.name || profile?.email?.split("@")[0] || "there";
 
+  const handleSend = async (overrideText?: string) => {
+    const content = (overrideText ?? input).trim();
+    if (!content || !user || sending) return;
+    if (!selectedAssistantId) {
+      toast.error("No assistant available. Activate one from the Assistants page.");
+      return;
+    }
+    setSending(true);
+    try {
+      // 1. Auto-activate the assistant if it's a prebuilt and not already active
+      const assistant = assistants.find((a) => a.id === selectedAssistantId);
+      if (assistant?.is_prebuilt && !activeAssistantIds.has(selectedAssistantId)) {
+        await supabase
+          .from("user_active_assistants")
+          .insert({ user_id: user.id, assistant_id: selectedAssistantId });
+        // ignore error (e.g. free-plan limit) — we still try to chat
+      }
+
+      // 2. Find or create a project lazily
+      let projectId = projects[0]?.id;
+      if (!projectId) {
+        const { data: newProj, error: pErr } = await supabase
+          .from("projects")
+          .insert({
+            user_id: user.id,
+            name: "Quick Chat",
+            description: "Auto-created from dashboard",
+          })
+          .select("id,name,description,created_at")
+          .single();
+        if (pErr) throw pErr;
+        projectId = newProj.id;
+      }
+
+      // 3. Create a conversation in that project
+      const { data: convo, error: cErr } = await supabase
+        .from("conversations")
+        .insert({
+          user_id: user.id,
+          project_id: projectId,
+          assistant_id: selectedAssistantId,
+          title: content.slice(0, 50),
+        })
+        .select("id")
+        .single();
+      if (cErr) throw cErr;
+
+      // 4. Insert the user's first message
+      const { error: mErr } = await supabase.from("messages").insert({
+        conversation_id: convo.id,
+        user_id: user.id,
+        role: "user",
+        content,
+      });
+      if (mErr) throw mErr;
+
+      // 5. Route into the workspace — it will pick up this convo as the most recent
+      navigate(`/project/${projectId}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to start chat");
+      setSending(false);
+    }
+  };
+
+  const handleSuggestion = (prompt: string) => {
+    setInput(prompt);
+    inputRef.current?.focus();
+  };
+
   return (
     <AppShell>
-      <div className="w-full space-y-6 p-4 sm:p-6">
-        <div className="rounded-2xl bg-primary p-6 text-primary-foreground sm:p-8">
-          <div className="flex items-start gap-3">
-            <Sparkles className="mt-1 h-6 w-6 shrink-0" />
-            <div>
-              <h1 className="font-heading text-2xl font-bold sm:text-3xl">Welcome back, {displayName}!</h1>
-              <p className="mt-2 text-sm text-primary-foreground/90 sm:text-base">
-                Your AI-powered development coach is ready. Start a project to get personalized guidance.
-              </p>
-            </div>
+      <div className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6">
+        {/* Compact welcome */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="font-heading text-xl font-bold text-foreground sm:text-2xl">
+              Hi {displayName}, what are you building today?
+            </h1>
+            <p className="truncate text-xs text-muted-foreground sm:text-sm">
+              Ask anything. Your AI coach is ready.
+            </p>
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-border bg-card p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Credits</p>
-            <p className="mt-2 font-heading text-3xl font-bold text-foreground">{profile?.credits ?? 0}</p>
-            <p className="mt-1 text-sm text-muted-foreground">credits remaining</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Plan</p>
-            <p className="mt-2 font-heading text-3xl font-bold capitalize text-foreground">{profile?.plan ?? "free"}</p>
-            <p className="mt-1 text-sm text-muted-foreground">current plan</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Projects</p>
-            <p className="mt-2 font-heading text-3xl font-bold text-foreground">{projects.length}</p>
-            <p className="mt-1 text-sm text-muted-foreground">total projects</p>
-          </div>
-        </div>
-
-        <section>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-heading text-xl font-bold text-foreground">Recent Projects</h2>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="h-10 gap-2">
-                  <Plus className="h-4 w-4" /> <span className="hidden xs:inline">New Project</span><span className="xs:hidden">New</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New Project</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-2">
-                  <div className="space-y-1.5">
-                    <Label>Project Name</Label>
-                    <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="My Awesome Project" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Description</Label>
-                    <Textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="What is this project about?" />
-                  </div>
-                  <Button onClick={handleCreate} disabled={creating} className="w-full">
-                    {creating ? "Creating..." : "Create Project"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {loading ? (
-            <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
-              Loading projects...
-            </div>
-          ) : projects.length === 0 ? (
-            <div className="rounded-2xl border border-border bg-card p-10 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                <FolderOpen className="h-6 w-6 text-primary" />
+        {/* Chat box */}
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+          {/* Assistant selector chip */}
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Coach:</span>
+            {loading ? (
+              <div className="h-7 w-32 animate-pulse rounded-full bg-muted" />
+            ) : usableAssistants.length === 0 ? (
+              <Link
+                to="/assistants"
+                className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-foreground hover:bg-muted/80"
+              >
+                <Bot className="h-3 w-3" /> Activate an assistant
+              </Link>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {usableAssistants.slice(0, 4).map((a) => {
+                  const Icon = iconMap[a.icon] || Bot;
+                  const isSelected = a.id === selectedAssistantId;
+                  return (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => setSelectedAssistantId(a.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-foreground hover:bg-muted/70"
+                      }`}
+                    >
+                      <Icon className="h-3 w-3" />
+                      <span className="max-w-[8rem] truncate">{a.name}</span>
+                    </button>
+                  );
+                })}
+                {usableAssistants.length > 4 && (
+                  <Link
+                    to="/assistants"
+                    className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-1 text-xs text-muted-foreground hover:bg-muted"
+                  >
+                    +{usableAssistants.length - 4} more
+                  </Link>
+                )}
               </div>
-              <h3 className="font-heading text-lg font-semibold text-foreground">No projects yet</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Create your first project to start working with AI assistants.
-              </p>
-              <Button onClick={() => setDialogOpen(true)} className="mt-5 gap-2">
-                <Plus className="h-4 w-4" /> New Project
+            )}
+          </div>
+
+          <Textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder={
+              selectedAssistant
+                ? `Message ${selectedAssistant.name}…`
+                : "Ask your AI coach anything…"
+            }
+            className="min-h-[96px] resize-none border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
+            disabled={sending || !selectedAssistantId}
+          />
+
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              {selectedAssistant && (
+                <>
+                  <SelectedIcon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">~1 credit / message</span>
+                  <span className="sm:hidden">1 credit</span>
+                </>
+              )}
+            </div>
+            <Button
+              onClick={() => handleSend()}
+              disabled={sending || !input.trim() || !selectedAssistantId}
+              className="h-10 gap-2"
+            >
+              {sending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Starting…
+                </>
+              ) : (
+                <>
+                  Send <Send className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Suggested prompts (only for first-time / empty users) */}
+        {!loading && projects.length === 0 && (
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Try asking
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {SUGGESTED_PROMPTS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => handleSuggestion(p)}
+                  className="group flex items-center justify-between gap-2 rounded-xl border border-border bg-card p-3 text-left text-sm text-foreground transition-colors hover:border-primary hover:bg-primary/5"
+                >
+                  <span className="line-clamp-2">{p}</span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recent projects (only when user has any) */}
+        {!loading && projects.length > 0 && (
+          <section>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="font-heading text-base font-semibold text-foreground sm:text-lg">
+                Recent projects
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/projects")}
+                className="h-8 gap-1 text-xs"
+              >
+                View all <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {projects.slice(0, 6).map((p) => (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {projects.slice(0, 3).map((p) => (
                 <Link
                   key={p.id}
                   to={`/project/${p.id}`}
-                  className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary"
+                  className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary"
                 >
-                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <FolderOpen className="h-5 w-5 text-primary" />
+                  <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                    <FolderOpen className="h-4 w-4 text-primary" />
                   </div>
-                  <h3 className="font-heading text-base font-semibold text-foreground">{p.name}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.description || "No description"}</p>
+                  <h3 className="truncate font-heading text-sm font-semibold text-foreground">
+                    {p.name}
+                  </h3>
+                  <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                    {p.description || "No description"}
+                  </p>
                 </Link>
               ))}
             </div>
-          )}
-        </section>
-
-        <section>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-heading text-xl font-bold text-foreground">AI Assistants</h2>
-            <Button variant="outline" size="sm" onClick={() => navigate("/assistants")} className="gap-2">
-              <Bot className="h-4 w-4" /> <span className="hidden sm:inline">Manage Assistants</span><span className="sm:hidden">Manage</span>
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Activate prebuilt assistants or create your own from the Assistants page.
-          </p>
-        </section>
+          </section>
+        )}
       </div>
     </AppShell>
   );
