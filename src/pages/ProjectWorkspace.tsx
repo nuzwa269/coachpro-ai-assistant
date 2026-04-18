@@ -66,7 +66,10 @@ export default function ProjectWorkspace() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [newAssistantId, setNewAssistantId] = useState<string>("");
+  const [chatTooLong, setChatTooLong] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const chatHealth = useMemo(() => getChatHealth(messages), [messages]);
 
   // Load project, assistants, conversations
   useEffect(() => {
