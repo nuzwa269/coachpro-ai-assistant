@@ -385,12 +385,34 @@ export default function ProjectWorkspace() {
                     <p className="truncate text-xs text-muted-foreground">{currentConvo?.title}</p>
                   </div>
                 </div>
-                <div className="hidden shrink-0 items-center gap-1.5 text-xs text-muted-foreground sm:flex">
-                  <MessageSquare className="h-3.5 w-3.5 text-primary" />
-                  <span className="font-medium text-foreground">
-                    ≈ {creditsToMessages(profile?.credits).toLocaleString()}
-                  </span>
-                  <span>left · {DEFAULT_CREDITS_PER_MESSAGE}/msg</span>
+                <div className="flex shrink-0 items-center gap-2">
+                  {messages.length > 6 && (
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2 py-1 text-xs">
+                            <span className={`h-2 w-2 rounded-full ${chatHealth.color}`} />
+                            <span className={`hidden sm:inline ${chatHealth.tone}`}>{chatHealth.label}</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs text-xs">
+                          Chat length affects AI memory and response quality. Long chats are auto-summarized in the background.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {chatHealth.level === "danger" && (
+                    <Button size="sm" variant="outline" onClick={startFreshConversation} className="h-7 px-2 text-xs">
+                      <Plus className="mr-1 h-3 w-3" /> New chat
+                    </Button>
+                  )}
+                  <div className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
+                    <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                    <span className="font-medium text-foreground">
+                      ≈ {creditsToMessages(profile?.credits).toLocaleString()}
+                    </span>
+                    <span>left · {DEFAULT_CREDITS_PER_MESSAGE}/msg</span>
+                  </div>
                 </div>
               </div>
 
