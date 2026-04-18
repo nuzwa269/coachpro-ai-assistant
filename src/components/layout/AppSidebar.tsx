@@ -115,7 +115,6 @@ export function AppSidebar({ mobileMode = false, onNavigate }: AppSidebarProps) 
         </nav>
 
         <div className="space-y-2 border-t border-border p-3">
-          {isFreePlan && <UpgradeCard onNavigate={onNavigate} />}
           
           <Link
             to="/buy-credits"

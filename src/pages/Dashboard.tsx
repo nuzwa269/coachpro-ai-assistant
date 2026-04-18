@@ -68,7 +68,7 @@ function ProBanner({ onDismiss }: { onDismiss: () => void }) {
         <Button
           size="sm"
           className="h-9 shrink-0 gap-1.5 text-xs sm:h-10 sm:px-4"
-          onClick={() => window.location.href = "/pricing"}
+          onClick={() => window.location.href = "/buy-credits"}
         >
           Upgrade <ArrowRight className="h-3.5 w-3.5" />
         </Button>
