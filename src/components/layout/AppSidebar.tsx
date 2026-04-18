@@ -1,9 +1,10 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, Bot, Bookmark, Coins, Settings, LogOut, Shield } from "lucide-react";
+import { NavLink, useNavigate, Link } from "react-router-dom";
+import { LayoutDashboard, FolderKanban, Bot, Bookmark, Coins, Settings, LogOut, Shield, MessageSquare } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { creditsToMessages } from "@/lib/credits";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
@@ -75,10 +76,25 @@ export function AppSidebar({ mobileMode = false, onNavigate }: AppSidebarProps) 
         </nav>
 
         <div className="space-y-1 border-t border-border p-3">
-          <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium">
-            <Coins className="h-4 w-4 text-primary" />
-            <span>{profile?.credits ?? 0} credits</span>
-          </div>
+          <Link
+            to="/buy-credits"
+            onClick={onNavigate}
+            className="block rounded-lg bg-muted/50 p-3 transition-colors hover:bg-muted"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                Messages left
+              </span>
+              <span className="text-sm font-semibold text-foreground">
+                ≈ {creditsToMessages(profile?.credits).toLocaleString()}
+              </span>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <Coins className="h-3 w-3" />
+              <span>{profile?.credits ?? 0} credits · tap to top up</span>
+            </div>
+          </Link>
           <button
             onClick={handleSignOut}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted hover:text-foreground"
