@@ -155,7 +155,7 @@ export type Database = {
       }
       conversations: {
         Row: {
-          assistant_id: string
+          assistant_id: string | null
           created_at: string
           id: string
           project_id: string
@@ -164,7 +164,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          assistant_id: string
+          assistant_id?: string | null
           created_at?: string
           id?: string
           project_id: string
@@ -173,7 +173,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          assistant_id?: string
+          assistant_id?: string | null
           created_at?: string
           id?: string
           project_id?: string
