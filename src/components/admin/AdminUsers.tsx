@@ -55,21 +55,12 @@ export function AdminUsers() {
       return;
     }
     setSaving(true);
-    const delta = newCredits - edit.credits;
-    const { error } = await supabase
-      .from("profiles")
-      .update({ credits: newCredits, plan })
-      .eq("id", edit.id);
-
-    if (!error && delta !== 0) {
-      await supabase.from("credit_transactions").insert({
-        user_id: edit.id,
-        amount: delta,
-        kind: "admin_adjust",
-        balance_after: newCredits,
-        notes: `Admin adjustment (${delta > 0 ? "+" : ""}${delta})`,
-      });
-    }
+    const { error } = await supabase.rpc("admin_adjust_credits", {
+      _user_id: edit.id,
+      _new_credits: newCredits,
+      _new_plan: plan,
+      _notes: null,
+    });
     setSaving(false);
     if (error) {
       toast.error(error.message);
