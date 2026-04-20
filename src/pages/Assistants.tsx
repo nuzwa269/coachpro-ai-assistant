@@ -27,6 +27,7 @@ type AssistantRow = {
   system_prompt: string;
   is_prebuilt: boolean;
   owner_id: string | null;
+  sort_order?: number;
 };
 
 export default function Assistants() {
