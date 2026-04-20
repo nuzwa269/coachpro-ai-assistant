@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("chat-ai error:", e);
-    return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
+    return json({ error: "Something went wrong. Please try again." }, 500);
   }
 });
 
