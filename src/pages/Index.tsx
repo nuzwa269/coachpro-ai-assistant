@@ -45,16 +45,16 @@ export default function Index() {
       <Header />
 
       {/* Hero — matching coachproai.com warm gradient with geometric patterns */}
-      <section className="hero-bg hero-pattern relative overflow-hidden py-24 md:py-36">
-        <div className="container relative z-10 text-center">
-          <div className="mx-auto max-w-3xl space-y-6">
-            <h1 className="font-heading text-5xl font-extrabold tracking-tight text-foreground md:text-7xl">
+      <section className="hero-bg hero-pattern relative overflow-hidden py-16 sm:py-24 md:py-36">
+        <div className="container relative z-10 px-4 text-center">
+          <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
+            <h1 className="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-7xl">
               CoachProAi
             </h1>
-            <h2 className="font-heading text-2xl font-semibold text-foreground/80 md:text-3xl">
+            <h2 className="font-heading text-xl font-semibold text-foreground/80 sm:text-2xl md:text-3xl">
               Where Ideas Become Tools
             </h2>
-            <p className="mx-auto max-w-xl text-lg text-muted-foreground">
+            <p className="mx-auto max-w-xl text-base text-muted-foreground sm:text-lg">
               Simple, fast, powerful AI tools for learning, teaching, and creating.
             </p>
             <div className="pt-4">

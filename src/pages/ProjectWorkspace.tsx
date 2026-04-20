@@ -351,7 +351,7 @@ export default function ProjectWorkspace() {
 
   return (
     <AppShell>
-      <div className="flex h-full overflow-hidden">
+      <div className="flex h-full min-h-0 overflow-hidden">
         {/* Desktop Left Sidebar */}
         <aside className="hidden w-72 shrink-0 overflow-hidden border-r border-border bg-card p-4 md:block">
           {SidebarContent}
