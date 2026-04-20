@@ -142,6 +142,33 @@ export function AdminAssistants() {
     setItems((arr) => arr.filter((a) => a.id !== id));
   };
 
+  const move = async (a: Assistant, dir: "up" | "down") => {
+    if (!a.is_prebuilt) return;
+    const prebuilt = items.filter((i) => i.is_prebuilt).sort((x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0));
+    const idx = prebuilt.findIndex((i) => i.id === a.id);
+    const swapWith = dir === "up" ? prebuilt[idx - 1] : prebuilt[idx + 1];
+    if (!swapWith) return;
+
+    const aOrder = a.sort_order ?? 0;
+    const bOrder = swapWith.sort_order ?? 0;
+
+    // optimistic
+    setItems((arr) =>
+      arr.map((i) =>
+        i.id === a.id ? { ...i, sort_order: bOrder } : i.id === swapWith.id ? { ...i, sort_order: aOrder } : i,
+      ),
+    );
+
+    const [r1, r2] = await Promise.all([
+      supabase.from("assistants").update({ sort_order: bOrder }).eq("id", a.id),
+      supabase.from("assistants").update({ sort_order: aOrder }).eq("id", swapWith.id),
+    ]);
+    if (r1.error || r2.error) {
+      toast.error("Reorder failed");
+      load();
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
