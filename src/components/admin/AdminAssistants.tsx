@@ -255,6 +255,7 @@ export function AdminAssistants() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[90px]">Order</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Type</TableHead>
@@ -263,8 +264,41 @@ export function AdminAssistants() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((a) => (
+                {items.map((a, idx, arr) => {
+                  const prebuiltList = arr.filter((i) => i.is_prebuilt);
+                  const pIdx = prebuiltList.findIndex((i) => i.id === a.id);
+                  const isFirst = pIdx === 0;
+                  const isLast = pIdx === prebuiltList.length - 1;
+                  return (
                   <TableRow key={a.id}>
+                    <TableCell>
+                      {a.is_prebuilt ? (
+                        <div className="flex gap-0.5">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => move(a, "up")}
+                            disabled={isFirst}
+                            title="Move up"
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => move(a, "down")}
+                            disabled={isLast}
+                            title="Move down"
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{a.name}</TableCell>
                     <TableCell>{a.category ?? "—"}</TableCell>
                     <TableCell>
@@ -304,7 +338,8 @@ export function AdminAssistants() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
