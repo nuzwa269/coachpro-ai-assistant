@@ -119,6 +119,13 @@ export type Database = {
             referencedRelation: "ai_models"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "assistants_default_model_id_fkey"
+            columns: ["default_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_models_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       conversation_summaries: {
@@ -276,6 +283,13 @@ export type Database = {
             referencedRelation: "ai_models"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "credit_transactions_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_models_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       messages: {
@@ -322,6 +336,13 @@ export type Database = {
             columns: ["model_id"]
             isOneToOne: false
             referencedRelation: "ai_models"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_models_public"
             referencedColumns: ["id"]
           },
         ]
@@ -615,9 +636,59 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      ai_models_public: {
+        Row: {
+          category: Database["public"]["Enums"]["model_category"] | null
+          created_at: string | null
+          credits_cost: number | null
+          description: string | null
+          display_name: string | null
+          id: string | null
+          is_active: boolean | null
+          min_plan: Database["public"]["Enums"]["user_plan"] | null
+          provider: string | null
+          provider_type: Database["public"]["Enums"]["provider_type"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["model_category"] | null
+          created_at?: string | null
+          credits_cost?: number | null
+          description?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          min_plan?: Database["public"]["Enums"]["user_plan"] | null
+          provider?: string | null
+          provider_type?: Database["public"]["Enums"]["provider_type"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["model_category"] | null
+          created_at?: string | null
+          credits_cost?: number | null
+          description?: string | null
+          display_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          min_plan?: Database["public"]["Enums"]["user_plan"] | null
+          provider?: string | null
+          provider_type?: Database["public"]["Enums"]["provider_type"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      admin_adjust_credits: {
+        Args: {
+          _new_credits: number
+          _new_plan?: Database["public"]["Enums"]["user_plan"]
+          _notes?: string
+          _user_id: string
+        }
+        Returns: number
+      }
       approve_payment: { Args: { _payment_id: string }; Returns: undefined }
       deduct_credits: {
         Args: {
