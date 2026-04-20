@@ -36,11 +36,10 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
 
     const body = await req.json();
-    const { conversation_id, model_id, system_prompt } = body as {
+    const { conversation_id, model_id } = body as {
       conversation_id: string;
       model_id: string;
       messages?: Msg[]; // accepted for backwards compat but ignored
-      system_prompt?: string;
     };
 
     if (!conversation_id || !model_id) {
@@ -48,6 +47,18 @@ Deno.serve(async (req) => {
     }
 
     const serviceClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Ownership check + fetch assistant system prompt server-side
+    const { data: convo, error: convoErr } = await serviceClient
+      .from("conversations")
+      .select("user_id, assistant_id, assistants ( system_prompt )")
+      .eq("id", conversation_id)
+      .maybeSingle();
+    if (convoErr || !convo || convo.user_id !== userId) {
+      return json({ error: "Conversation not found or access denied" }, 403);
+    }
+    const system_prompt: string | undefined =
+      (convo as any).assistants?.system_prompt ?? undefined;
 
     const { data: model, error: modelErr } = await serviceClient
       .from("ai_models")
@@ -192,7 +203,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("chat-ai error:", e);
-    return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
+    return json({ error: "Something went wrong. Please try again." }, 500);
   }
 });
 
@@ -253,7 +264,10 @@ async function callProvider(model: any, messages: Msg[]): Promise<string> {
     });
   } else if (model.provider_type === "openai_compatible") {
     const apiKey = Deno.env.get(model.api_key_secret_name);
-    if (!apiKey) throw new Error(`Secret ${model.api_key_secret_name} not configured`);
+    if (!apiKey) {
+      console.error("Missing API key for model", model.id, "secret name:", model.api_key_secret_name);
+      throw new Error("Model provider is not configured. Contact support.");
+    }
     const base = (model.api_base_url || "").replace(/\/+$/, "");
     return await callOpenAICompat({
       url: `${base}/chat/completions`,
@@ -263,7 +277,10 @@ async function callProvider(model: any, messages: Msg[]): Promise<string> {
     });
   } else if (model.provider_type === "anthropic") {
     const apiKey = Deno.env.get(model.api_key_secret_name);
-    if (!apiKey) throw new Error(`Secret ${model.api_key_secret_name} not configured`);
+    if (!apiKey) {
+      console.error("Missing API key for model", model.id, "secret name:", model.api_key_secret_name);
+      throw new Error("Model provider is not configured. Contact support.");
+    }
     return await callAnthropic({
       apiKey,
       modelName: model.api_model_name!,
@@ -290,7 +307,11 @@ async function callOpenAICompat(opts: {
   });
   if (!resp.ok) {
     const t = await resp.text();
-    throw new Error(`Provider error ${resp.status}: ${t.slice(0, 500)}`);
+    console.error("OpenAI-compat provider error", resp.status, t.slice(0, 500));
+    if (isContextOverflowError(t)) {
+      throw new Error("context_length_exceeded");
+    }
+    throw new Error("AI provider request failed. Please try again.");
   }
   const data = await resp.json();
   return data.choices?.[0]?.message?.content ?? "";
@@ -318,7 +339,11 @@ async function callAnthropic(opts: {
   });
   if (!resp.ok) {
     const t = await resp.text();
-    throw new Error(`Anthropic error ${resp.status}: ${t.slice(0, 500)}`);
+    console.error("Anthropic provider error", resp.status, t.slice(0, 500));
+    if (isContextOverflowError(t)) {
+      throw new Error("context_length_exceeded");
+    }
+    throw new Error("AI provider request failed. Please try again.");
   }
   const data = await resp.json();
   return data.content?.[0]?.text ?? "";
