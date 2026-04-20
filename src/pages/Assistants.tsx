@@ -46,7 +46,11 @@ export default function Assistants() {
   useEffect(() => {
     if (!user) return;
     Promise.all([
-      supabase.from("assistants").select("id,name,description,icon,category,system_prompt,is_prebuilt,owner_id").order("created_at"),
+      supabase
+        .from("assistants")
+        .select("id,name,description,icon,category,system_prompt,is_prebuilt,owner_id,sort_order")
+        .order("sort_order", { ascending: true })
+        .order("created_at"),
       supabase.from("user_active_assistants").select("assistant_id").eq("user_id", user.id),
     ]).then(([aRes, actRes]) => {
       if (aRes.error) toast.error(aRes.error.message);
