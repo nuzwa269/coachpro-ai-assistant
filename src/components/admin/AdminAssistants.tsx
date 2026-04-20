@@ -16,7 +16,7 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
 type Assistant = {
@@ -30,6 +30,7 @@ type Assistant = {
   is_prebuilt: boolean;
   is_active: boolean;
   owner_id: string | null;
+  sort_order: number;
 };
 
 type ModelOpt = { id: string; display_name: string };
@@ -62,8 +63,9 @@ export function AdminAssistants() {
     const [a, m] = await Promise.all([
       supabase
         .from("assistants")
-        .select("id,name,description,category,icon,system_prompt,default_model_id,is_prebuilt,is_active,owner_id")
+        .select("id,name,description,category,icon,system_prompt,default_model_id,is_prebuilt,is_active,owner_id,sort_order")
         .order("is_prebuilt", { ascending: false })
+        .order("sort_order", { ascending: true })
         .order("name"),
       supabase.from("ai_models").select("id,display_name").eq("is_active", true).order("display_name"),
     ]);
@@ -118,7 +120,13 @@ export function AdminAssistants() {
 
     const { error } = editing
       ? await supabase.from("assistants").update(payload).eq("id", editing.id)
-      : await supabase.from("assistants").insert({ ...payload, is_prebuilt: true, owner_id: null, is_active: true });
+      : await supabase.from("assistants").insert({
+          ...payload,
+          is_prebuilt: true,
+          owner_id: null,
+          is_active: true,
+          sort_order: (items.filter((i) => i.is_prebuilt).reduce((m, i) => Math.max(m, i.sort_order ?? 0), 0)) + 10,
+        });
 
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -132,6 +140,33 @@ export function AdminAssistants() {
     if (error) return toast.error(error.message);
     toast.success("Deleted");
     setItems((arr) => arr.filter((a) => a.id !== id));
+  };
+
+  const move = async (a: Assistant, dir: "up" | "down") => {
+    if (!a.is_prebuilt) return;
+    const prebuilt = items.filter((i) => i.is_prebuilt).sort((x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0));
+    const idx = prebuilt.findIndex((i) => i.id === a.id);
+    const swapWith = dir === "up" ? prebuilt[idx - 1] : prebuilt[idx + 1];
+    if (!swapWith) return;
+
+    const aOrder = a.sort_order ?? 0;
+    const bOrder = swapWith.sort_order ?? 0;
+
+    // optimistic
+    setItems((arr) =>
+      arr.map((i) =>
+        i.id === a.id ? { ...i, sort_order: bOrder } : i.id === swapWith.id ? { ...i, sort_order: aOrder } : i,
+      ),
+    );
+
+    const [r1, r2] = await Promise.all([
+      supabase.from("assistants").update({ sort_order: bOrder }).eq("id", a.id),
+      supabase.from("assistants").update({ sort_order: aOrder }).eq("id", swapWith.id),
+    ]);
+    if (r1.error || r2.error) {
+      toast.error("Reorder failed");
+      load();
+    }
   };
 
   return (
@@ -220,6 +255,7 @@ export function AdminAssistants() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[90px]">Order</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Type</TableHead>
@@ -228,8 +264,41 @@ export function AdminAssistants() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((a) => (
+                {items.map((a, idx, arr) => {
+                  const prebuiltList = arr.filter((i) => i.is_prebuilt);
+                  const pIdx = prebuiltList.findIndex((i) => i.id === a.id);
+                  const isFirst = pIdx === 0;
+                  const isLast = pIdx === prebuiltList.length - 1;
+                  return (
                   <TableRow key={a.id}>
+                    <TableCell>
+                      {a.is_prebuilt ? (
+                        <div className="flex gap-0.5">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => move(a, "up")}
+                            disabled={isFirst}
+                            title="Move up"
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => move(a, "down")}
+                            disabled={isLast}
+                            title="Move down"
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{a.name}</TableCell>
                     <TableCell>{a.category ?? "—"}</TableCell>
                     <TableCell>
@@ -269,7 +338,8 @@ export function AdminAssistants() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

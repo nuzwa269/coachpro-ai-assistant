@@ -77,6 +77,7 @@ export type Database = {
           is_prebuilt: boolean
           name: string
           owner_id: string | null
+          sort_order: number
           system_prompt: string
           updated_at: string
         }
@@ -91,6 +92,7 @@ export type Database = {
           is_prebuilt?: boolean
           name: string
           owner_id?: string | null
+          sort_order?: number
           system_prompt: string
           updated_at?: string
         }
@@ -105,6 +107,7 @@ export type Database = {
           is_prebuilt?: boolean
           name?: string
           owner_id?: string | null
+          sort_order?: number
           system_prompt?: string
           updated_at?: string
         }
