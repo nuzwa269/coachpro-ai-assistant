@@ -16,7 +16,7 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
 type Assistant = {
@@ -30,6 +30,7 @@ type Assistant = {
   is_prebuilt: boolean;
   is_active: boolean;
   owner_id: string | null;
+  sort_order: number;
 };
 
 type ModelOpt = { id: string; display_name: string };
@@ -62,8 +63,9 @@ export function AdminAssistants() {
     const [a, m] = await Promise.all([
       supabase
         .from("assistants")
-        .select("id,name,description,category,icon,system_prompt,default_model_id,is_prebuilt,is_active,owner_id")
+        .select("id,name,description,category,icon,system_prompt,default_model_id,is_prebuilt,is_active,owner_id,sort_order")
         .order("is_prebuilt", { ascending: false })
+        .order("sort_order", { ascending: true })
         .order("name"),
       supabase.from("ai_models").select("id,display_name").eq("is_active", true).order("display_name"),
     ]);
