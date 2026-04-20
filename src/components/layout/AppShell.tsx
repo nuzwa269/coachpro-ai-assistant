@@ -18,16 +18,16 @@ export function AppShell({ children }: AppShellProps) {
   const messagesLeft = creditsToMessages(credits);
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-background md:flex-row">
+    <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-background md:flex-row">
       {/* Mobile top bar */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4 md:hidden">
+      <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-card px-3 sm:px-4 md:hidden">
         <Link to="/dashboard" className="flex items-center">
           <img src={logo} alt="CoachPro AI" className="h-7 w-auto" />
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <Link
             to="/buy-credits"
-            className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+            className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
             aria-label={`${messagesLeft} messages remaining, tap to buy credits`}
           >
             <MessageSquare className="h-3 w-3" />
@@ -42,7 +42,7 @@ export function AppShell({ children }: AppShellProps) {
         <AppSidebar />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Desktop top bar */}
         <header className="hidden h-14 shrink-0 items-center justify-between border-b border-border bg-card px-6 md:flex">
           <div className="text-sm font-medium text-foreground">Workspace</div>
@@ -54,7 +54,9 @@ export function AppShell({ children }: AppShellProps) {
             <UserAvatarMenu />
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto pb-[72px] md:pb-0">{children}</main>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
+          {children}
+        </main>
       </div>
 
       {/* Mobile bottom tab bar */}
