@@ -36,11 +36,10 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
 
     const body = await req.json();
-    const { conversation_id, model_id, system_prompt } = body as {
+    const { conversation_id, model_id } = body as {
       conversation_id: string;
       model_id: string;
       messages?: Msg[]; // accepted for backwards compat but ignored
-      system_prompt?: string;
     };
 
     if (!conversation_id || !model_id) {
@@ -48,6 +47,18 @@ Deno.serve(async (req) => {
     }
 
     const serviceClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Ownership check + fetch assistant system prompt server-side
+    const { data: convo, error: convoErr } = await serviceClient
+      .from("conversations")
+      .select("user_id, assistant_id, assistants ( system_prompt )")
+      .eq("id", conversation_id)
+      .maybeSingle();
+    if (convoErr || !convo || convo.user_id !== userId) {
+      return json({ error: "Conversation not found or access denied" }, 403);
+    }
+    const system_prompt: string | undefined =
+      (convo as any).assistants?.system_prompt ?? undefined;
 
     const { data: model, error: modelErr } = await serviceClient
       .from("ai_models")
