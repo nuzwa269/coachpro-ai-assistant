@@ -120,7 +120,13 @@ export function AdminAssistants() {
 
     const { error } = editing
       ? await supabase.from("assistants").update(payload).eq("id", editing.id)
-      : await supabase.from("assistants").insert({ ...payload, is_prebuilt: true, owner_id: null, is_active: true });
+      : await supabase.from("assistants").insert({
+          ...payload,
+          is_prebuilt: true,
+          owner_id: null,
+          is_active: true,
+          sort_order: (items.filter((i) => i.is_prebuilt).reduce((m, i) => Math.max(m, i.sort_order ?? 0), 0)) + 10,
+        });
 
     setSaving(false);
     if (error) return toast.error(error.message);
