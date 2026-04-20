@@ -264,7 +264,10 @@ async function callProvider(model: any, messages: Msg[]): Promise<string> {
     });
   } else if (model.provider_type === "openai_compatible") {
     const apiKey = Deno.env.get(model.api_key_secret_name);
-    if (!apiKey) throw new Error(`Secret ${model.api_key_secret_name} not configured`);
+    if (!apiKey) {
+      console.error("Missing API key for model", model.id, "secret name:", model.api_key_secret_name);
+      throw new Error("Model provider is not configured. Contact support.");
+    }
     const base = (model.api_base_url || "").replace(/\/+$/, "");
     return await callOpenAICompat({
       url: `${base}/chat/completions`,
@@ -274,7 +277,10 @@ async function callProvider(model: any, messages: Msg[]): Promise<string> {
     });
   } else if (model.provider_type === "anthropic") {
     const apiKey = Deno.env.get(model.api_key_secret_name);
-    if (!apiKey) throw new Error(`Secret ${model.api_key_secret_name} not configured`);
+    if (!apiKey) {
+      console.error("Missing API key for model", model.id, "secret name:", model.api_key_secret_name);
+      throw new Error("Model provider is not configured. Contact support.");
+    }
     return await callAnthropic({
       apiKey,
       modelName: model.api_model_name!,
@@ -301,7 +307,11 @@ async function callOpenAICompat(opts: {
   });
   if (!resp.ok) {
     const t = await resp.text();
-    throw new Error(`Provider error ${resp.status}: ${t.slice(0, 500)}`);
+    console.error("OpenAI-compat provider error", resp.status, t.slice(0, 500));
+    if (isContextOverflowError(t)) {
+      throw new Error("context_length_exceeded");
+    }
+    throw new Error("AI provider request failed. Please try again.");
   }
   const data = await resp.json();
   return data.choices?.[0]?.message?.content ?? "";
@@ -329,7 +339,11 @@ async function callAnthropic(opts: {
   });
   if (!resp.ok) {
     const t = await resp.text();
-    throw new Error(`Anthropic error ${resp.status}: ${t.slice(0, 500)}`);
+    console.error("Anthropic provider error", resp.status, t.slice(0, 500));
+    if (isContextOverflowError(t)) {
+      throw new Error("context_length_exceeded");
+    }
+    throw new Error("AI provider request failed. Please try again.");
   }
   const data = await resp.json();
   return data.content?.[0]?.text ?? "";
