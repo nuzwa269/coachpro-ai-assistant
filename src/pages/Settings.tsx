@@ -130,8 +130,8 @@ export default function Settings() {
     <AppShell>
       <div className="mx-auto w-full max-w-3xl space-y-6 p-4 sm:p-6 sm:py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-heading text-3xl font-bold">Settings</h1>
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
+          <h1 className="font-heading text-2xl font-bold sm:text-3xl">Settings</h1>
+          <Button variant="outline" size="sm" onClick={handleSignOut} className="h-9">
             <LogOut className="mr-2 h-4 w-4" /> Sign Out
           </Button>
         </div>
@@ -222,31 +222,36 @@ export default function Settings() {
             ) : transactions.length === 0 ? (
               <p className="py-6 text-center text-sm text-muted-foreground">No transactions yet.</p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Transaction</TableHead>
-                    <TableHead>Credits</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.map((h) => (
-                    <TableRow key={h.id}>
-                      <TableCell className="font-medium">
-                        {kindLabel[h.kind] ?? h.kind}
-                        {h.notes && <span className="block text-xs text-muted-foreground">{h.notes}</span>}
-                      </TableCell>
-                      <TableCell className={h.amount > 0 ? "text-primary" : "text-destructive"}>
-                        {h.amount > 0 ? `+${h.amount}` : h.amount}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(h.created_at).toLocaleDateString()}
-                      </TableCell>
+              <div className="-mx-2 overflow-x-auto sm:mx-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Transaction</TableHead>
+                      <TableHead className="text-right">Credits</TableHead>
+                      <TableHead className="hidden sm:table-cell">Date</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.map((h) => (
+                      <TableRow key={h.id}>
+                        <TableCell className="max-w-[180px] font-medium">
+                          <div className="truncate">{kindLabel[h.kind] ?? h.kind}</div>
+                          {h.notes && <span className="block truncate text-xs text-muted-foreground">{h.notes}</span>}
+                          <span className="block text-xs text-muted-foreground sm:hidden">
+                            {new Date(h.created_at).toLocaleDateString()}
+                          </span>
+                        </TableCell>
+                        <TableCell className={`text-right font-semibold ${h.amount > 0 ? "text-primary" : "text-destructive"}`}>
+                          {h.amount > 0 ? `+${h.amount}` : h.amount}
+                        </TableCell>
+                        <TableCell className="hidden text-muted-foreground sm:table-cell">
+                          {new Date(h.created_at).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>

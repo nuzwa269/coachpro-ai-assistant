@@ -97,12 +97,12 @@ export function AdminUsers() {
         {loading ? (
           <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="-mx-6 overflow-x-auto px-6 sm:mx-0 sm:px-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Name</TableHead>
+                  <TableHead className="min-w-[180px]">Email</TableHead>
+                  <TableHead className="hidden sm:table-cell">Name</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Credits</TableHead>
                   <TableHead className="text-right">Action</TableHead>
@@ -111,8 +111,8 @@ export function AdminUsers() {
               <TableBody>
                 {filtered.map((u) => (
                   <TableRow key={u.id}>
-                    <TableCell className="font-medium">{u.email}</TableCell>
-                    <TableCell>{u.name ?? "—"}</TableCell>
+                    <TableCell className="max-w-[200px] truncate font-medium">{u.email}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{u.name ?? "—"}</TableCell>
                     <TableCell>
                       <Badge variant={u.plan === "free" ? "secondary" : "default"}>
                         {u.plan === "pro" && <Crown className="mr-1 h-3 w-3" />}

@@ -46,8 +46,8 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Bottom bar — dark gray */}
-      <div className="bg-[#4a4a4a] py-4 text-center text-sm text-white">
+      {/* Bottom bar */}
+      <div className="bg-muted py-4 text-center text-xs text-muted-foreground sm:text-sm">
         &copy; {new Date().getFullYear()} CoachPro AI | Developed by Codfusion.
       </div>
     </footer>
