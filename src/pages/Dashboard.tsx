@@ -384,6 +384,52 @@ export default function Dashboard() {
         )}
 
         {/* Recent projects (only when user has any) */}
+        {!loading && usableAssistants.length > 0 && (
+          <section>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="font-heading text-base font-semibold text-foreground sm:text-lg">
+                Recent assistants
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/assistants")}
+                className="h-8 gap-1 text-xs"
+              >
+                View all <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {usableAssistants.slice(0, 3).map((a) => {
+                const Icon = iconMap[a.icon] || Bot;
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedAssistantId(a.id);
+                      inputRef.current?.focus();
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="group rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-primary"
+                  >
+                    <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                      <Icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <h3 className="truncate font-heading text-sm font-semibold text-foreground">
+                      {a.name}
+                    </h3>
+                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                      {a.description || "AI assistant"}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Recent projects (only when user has any) */}
         {!loading && projects.length > 0 && (
           <section>
             <div className="mb-3 flex items-center justify-between gap-2">
@@ -399,7 +445,7 @@ export default function Dashboard() {
                 View all <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {projects.slice(0, 3).map((p) => (
                 <Link
                   key={p.id}
