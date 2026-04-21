@@ -39,6 +39,7 @@ type Assistant = {
   id: string; name: string; description: string | null; icon: string;
   category: string | null; is_prebuilt: boolean;
   system_prompt: string; default_model_id: string | null;
+  conversation_starters?: string[] | null;
 };
 type Conversation = { id: string; title: string; assistant_id: string };
 type Message = {
@@ -79,7 +80,7 @@ export default function ProjectWorkspace() {
       setLoading(true);
       const [projRes, assistRes, activeRes, convoRes, savedRes] = await Promise.all([
         supabase.from("projects").select("id,name,description").eq("id", id).maybeSingle(),
-        supabase.from("assistants").select("id,name,description,icon,category,is_prebuilt,system_prompt,default_model_id").eq("is_active", true),
+        supabase.from("assistants").select("id,name,description,icon,category,is_prebuilt,system_prompt,default_model_id,conversation_starters").eq("is_active", true),
         supabase.from("user_active_assistants").select("assistant_id").eq("user_id", user.id),
         supabase.from("conversations").select("id,title,assistant_id").eq("project_id", id).order("updated_at", { ascending: false }),
         supabase.from("saved_responses").select("message_id").eq("user_id", user.id),
