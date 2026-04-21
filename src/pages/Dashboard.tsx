@@ -26,6 +26,7 @@ type Assistant = {
   category: string | null;
   is_prebuilt: boolean;
   conversation_starters: string[] | null;
+  default_model_id: string | null;
 };
 
 type ProjectRow = {
@@ -105,7 +106,7 @@ export default function Dashboard() {
           .order("created_at", { ascending: false }),
         supabase
           .from("assistants")
-          .select("id,name,description,icon,category,is_prebuilt,conversation_starters")
+          .select("id,name,description,icon,category,is_prebuilt,conversation_starters,default_model_id")
           .eq("is_active", true),
         supabase
           .from("user_active_assistants")
