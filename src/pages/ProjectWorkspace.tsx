@@ -39,6 +39,7 @@ type Assistant = {
   id: string; name: string; description: string | null; icon: string;
   category: string | null; is_prebuilt: boolean;
   system_prompt: string; default_model_id: string | null;
+  conversation_starters?: string[] | null;
 };
 type Conversation = { id: string; title: string; assistant_id: string };
 type Message = {
@@ -79,7 +80,7 @@ export default function ProjectWorkspace() {
       setLoading(true);
       const [projRes, assistRes, activeRes, convoRes, savedRes] = await Promise.all([
         supabase.from("projects").select("id,name,description").eq("id", id).maybeSingle(),
-        supabase.from("assistants").select("id,name,description,icon,category,is_prebuilt,system_prompt,default_model_id").eq("is_active", true),
+        supabase.from("assistants").select("id,name,description,icon,category,is_prebuilt,system_prompt,default_model_id,conversation_starters").eq("is_active", true),
         supabase.from("user_active_assistants").select("assistant_id").eq("user_id", user.id),
         supabase.from("conversations").select("id,title,assistant_id").eq("project_id", id).order("updated_at", { ascending: false }),
         supabase.from("saved_responses").select("message_id").eq("user_id", user.id),
@@ -419,8 +420,36 @@ export default function ProjectWorkspace() {
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-4">
                 <div className="mx-auto max-w-3xl space-y-4">
                   {messages.length === 0 ? (
-                    <div className="py-12 text-center text-sm text-muted-foreground">
-                      Start the conversation by sending a message below.
+                    <div className="py-10 text-center">
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary/10">
+                        <AssistantIcon className="h-6 w-6 text-secondary" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground">
+                        Chat with {currentAssistant?.name || "your assistant"}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Pick a quick starter below or type your own prompt.
+                      </p>
+                      {(() => {
+                        const starters = (currentAssistant?.conversation_starters ?? []).filter(Boolean).slice(0, 5);
+                        if (starters.length === 0) return null;
+                        return (
+                          <div className="mx-auto mt-5 grid max-w-xl gap-2 sm:grid-cols-2">
+                            {starters.map((s, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => { setInput(s); }}
+                                disabled={sending}
+                                className="group flex items-start gap-2 rounded-xl border border-border bg-card p-3 text-left text-sm text-foreground transition-colors hover:border-primary hover:bg-primary/5 disabled:opacity-50"
+                              >
+                                <Bot className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                                <span className="line-clamp-2">{s}</span>
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   ) : (
                     messages.map((m) => {

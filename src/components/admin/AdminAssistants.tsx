@@ -31,6 +31,7 @@ type Assistant = {
   is_active: boolean;
   owner_id: string | null;
   sort_order: number;
+  conversation_starters: string[];
 };
 
 type ModelOpt = { id: string; display_name: string };
@@ -47,6 +48,7 @@ const emptyForm = {
   icon: "Bot",
   system_prompt: "",
   default_model_id: "",
+  starters: ["", "", "", "", ""] as string[],
 };
 
 export function AdminAssistants() {
@@ -63,7 +65,7 @@ export function AdminAssistants() {
     const [a, m] = await Promise.all([
       supabase
         .from("assistants")
-        .select("id,name,description,category,icon,system_prompt,default_model_id,is_prebuilt,is_active,owner_id,sort_order")
+        .select("id,name,description,category,icon,system_prompt,default_model_id,is_prebuilt,is_active,owner_id,sort_order,conversation_starters")
         .order("is_prebuilt", { ascending: false })
         .order("sort_order", { ascending: true })
         .order("name"),
@@ -93,6 +95,8 @@ export function AdminAssistants() {
 
   const openEdit = (a: Assistant) => {
     setEditing(a);
+    const s = (a.conversation_starters ?? []).slice(0, 5);
+    while (s.length < 5) s.push("");
     setForm({
       name: a.name,
       description: a.description ?? "",
@@ -100,6 +104,7 @@ export function AdminAssistants() {
       icon: a.icon || "Bot",
       system_prompt: a.system_prompt,
       default_model_id: a.default_model_id ?? "",
+      starters: s,
     });
     setDialogOpen(true);
   };
@@ -116,6 +121,7 @@ export function AdminAssistants() {
       icon: form.icon || "Bot",
       system_prompt: form.system_prompt.trim(),
       default_model_id: form.default_model_id || null,
+      conversation_starters: form.starters.map((s) => s.trim()).filter(Boolean).slice(0, 5),
     };
 
     const { error } = editing
@@ -234,6 +240,28 @@ export function AdminAssistants() {
                   placeholder="You are a helpful coding tutor that..."
                   rows={8}
                 />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Conversation Starters</Label>
+                <p className="text-xs text-muted-foreground">
+                  Up to 5 quick prompts. Shown as clickable chips when a user picks this assistant. Leave empty to skip.
+                </p>
+                <div className="space-y-2">
+                  {form.starters.map((s, i) => (
+                    <Input
+                      key={i}
+                      value={s}
+                      onChange={(e) => {
+                        const next = [...form.starters];
+                        next[i] = e.target.value;
+                        setForm({ ...form, starters: next });
+                      }}
+                      placeholder={`Starter ${i + 1} (e.g. "Help me debug this error…")`}
+                      maxLength={140}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 

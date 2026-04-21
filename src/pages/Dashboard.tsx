@@ -25,6 +25,7 @@ type Assistant = {
   icon: string;
   category: string | null;
   is_prebuilt: boolean;
+  conversation_starters: string[] | null;
 };
 
 type ProjectRow = {
@@ -104,7 +105,7 @@ export default function Dashboard() {
           .order("created_at", { ascending: false }),
         supabase
           .from("assistants")
-          .select("id,name,description,icon,category,is_prebuilt")
+          .select("id,name,description,icon,category,is_prebuilt,conversation_starters")
           .eq("is_active", true),
         supabase
           .from("user_active_assistants")
@@ -146,6 +147,7 @@ export default function Dashboard() {
 
   const selectedAssistant = assistants.find((a) => a.id === selectedAssistantId);
   const SelectedIcon = selectedAssistant ? iconMap[selectedAssistant.icon] || Bot : Bot;
+  const assistantStarters = (selectedAssistant?.conversation_starters ?? []).filter(Boolean).slice(0, 5);
 
   const displayName = profile?.name || profile?.email?.split("@")[0] || "there";
   const isFreePlan = profile?.plan === "free";
@@ -340,6 +342,28 @@ export default function Dashboard() {
               )}
             </Button>
           </div>
+
+          {assistantStarters.length > 0 && (
+            <div className="mt-4 border-t border-border pt-3">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">
+                Quick starters from {selectedAssistant?.name}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {assistantStarters.map((s, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => handleSuggestion(s)}
+                    disabled={sending}
+                    className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:bg-primary/5 disabled:opacity-50"
+                  >
+                    <Sparkles className="h-3 w-3 shrink-0 text-primary" />
+                    <span className="line-clamp-1 text-left">{s}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Low-credits non-blocking banner */}
