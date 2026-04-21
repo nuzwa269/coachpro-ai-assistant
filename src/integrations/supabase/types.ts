@@ -68,6 +68,7 @@ export type Database = {
       assistants: {
         Row: {
           category: string | null
+          conversation_starters: string[]
           created_at: string
           default_model_id: string | null
           description: string | null
@@ -83,6 +84,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          conversation_starters?: string[]
           created_at?: string
           default_model_id?: string | null
           description?: string | null
@@ -98,6 +100,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          conversation_starters?: string[]
           created_at?: string
           default_model_id?: string | null
           description?: string | null
