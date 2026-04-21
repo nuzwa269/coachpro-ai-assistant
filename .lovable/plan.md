@@ -1,104 +1,81 @@
 
-## Plan: Smart Context Management for Long Chats
 
-Three coordinated changes — backend trimming + summarization, friendly error fallback, and a UI health indicator. No pricing changes.
+## Plan: AI Help Page + Per-Assistant Default Model
 
----
-
-### 1. Recent window + rolling summary (backend)
-
-**File:** `supabase/functions/chat-ai/index.ts`
-
-Add a new `conversation_summaries` table to store one rolling summary per conversation, plus durable facts.
-
-**New table:**
-```sql
-create table public.conversation_summaries (
-  conversation_id uuid primary key references conversations(id) on delete cascade,
-  summary text not null default '',
-  durable_facts text not null default '',  -- preferences, goals, decisions, key refs
-  summarized_up_to_message_id uuid,        -- last message included in summary
-  message_count_at_summary int default 0,
-  updated_at timestamptz default now()
-);
-```
-RLS: user can read summaries for their own conversations only; service role writes.
-
-**Logic in `chat-ai`:**
-- Fetch full message history from DB for `conversation_id` (don't trust client-sent array beyond the latest user message).
-- Define `RECENT_WINDOW = 16` messages (8 turns).
-- If total messages ≤ 16 → send as-is, no summary needed.
-- If > 16 → build payload as:
-  ```
-  [system_prompt]
-  [system: "Conversation summary so far: {summary}\n\nKey facts: {durable_facts}"]
-  [last 16 messages raw]
-  [new user message]
-  ```
-- After every 10 new messages past the threshold, async-trigger a summarization call (cheap model: `google/gemini-2.5-flash-lite`) that:
-  - Takes the OLD summary + the messages now falling out of the recent window
-  - Produces a new compressed summary + extracts durable facts (preferences, goals, decisions, file/code refs, open questions)
-  - Upserts into `conversation_summaries`
-- Summarization cost is absorbed by us (not deducted from user credits) — it's infrastructure.
-
-**Why DB-driven, not client array:** prevents tampering, ensures summary stays in sync, and we control what the AI sees.
+دو features ایک ساتھ:
+**(A)** "AI Assistant کیسے Activate کریں" کا in-app help/documentation صفحہ
+**(C)** Admin سے ہر assistant کے لیے default AI model منتخب کرنے کی سہولت
 
 ---
 
-### 2. Friendly context-exceeded fallback
+### Part A — Help / Documentation Page
 
-**File:** `supabase/functions/chat-ai/index.ts`
+**نیا route:** `/help/assistants` (sidebar میں "Help" link)
 
-Wrap the provider call. On error response, detect:
-- `context_length_exceeded` / `maximum context length` / status 400 with token-related message
-- Anthropic `invalid_request_error` with input length
+**نیا file:** `src/pages/HelpAssistants.tsx`
+- اردو + English bilingual content (آپ کی app کی طرز پر)
+- مرحلہ وار guide cards کے ساتھ:
+  1. **AI Assistants کیا ہیں؟** — مختصر تعارف
+  2. **Activate کیسے کریں** — `/assistants` پر جائیں → کارڈ پر "Activate" دبائیں → Free plan میں 1، paid میں زیادہ
+  3. **Chat میں استعمال** — Dashboard پر assistant card پر کلک → input میں منتخب → پیغام بھیجیں
+  4. **Conversation Starters** — اگر admin نے سیٹ کیے ہوں تو نیچے chips ظاہر ہوں گے
+  5. **Custom Assistant بنانا** — `/assistants` → "Create Assistant" → name, description, system prompt
+  6. **Credits کیسے کٹتے ہیں** — ہر پیغام پر منتخب model کے مطابق
+- ہر step کے ساتھ متعلقہ صفحے کا shortcut button (مثلاً "Open Assistants Page")
+- آخر میں FAQ accordion (5–6 عام سوالات)
 
-On detection:
-1. Force an immediate aggressive summarization: collapse ALL but the last 6 messages into the summary.
-2. Retry the request once.
-3. If retry also fails → return `{ error: "chat_too_long", message: "..." }` with status 413.
-
-**Frontend handling** in `src/pages/ProjectWorkspace.tsx`:
-- Catch `chat_too_long` → show friendly dialog:
-  - "This conversation has grown very large. We've saved a summary. Start a fresh chat to continue smoothly — your context is preserved."
-  - Button: "Start new chat" (creates new conversation, optionally seeded with the summary as the first system note).
-
----
-
-### 3. Chat health indicator (UI)
-
-**File:** `src/pages/ProjectWorkspace.tsx` (workspace header area, near model name)
-
-Replace any raw "X messages" idea with a **health pill** based on a composite score:
-
-```
-score = messageCount * 1 + totalCharsInLast20 / 2000
-```
-
-Buckets:
-- `score < 20` → green dot · "Healthy"
-- `score 20–50` → amber dot · "Getting long"
-- `score > 50` → red dot · "Very long — consider new chat" + small "New chat" button inline
-
-Tooltip on hover: "Chat length affects AI memory and response quality. Long chats are auto-summarized."
-
-Subtle, fits in header. No numeric counter shown by default — only the qualitative signal, as requested.
+**Sidebar update:** `src/components/layout/AppSidebar.tsx` میں "Help" link (HelpCircle icon) شامل
+**Routing:** `src/App.tsx` میں نیا route register
 
 ---
 
-### Technical notes
+### Part C — Per-Assistant Default Model
 
-- New migration creates `conversation_summaries` + RLS.
-- `chat-ai` does ONE extra `select` for summary on every call (negligible).
-- Summarization is fire-and-forget after the user gets their reply (doesn't slow chat).
-- Summarization uses `gemini-2.5-flash-lite` directly via Lovable AI gateway, hardcoded — not from `ai_models` table.
-- Recent window of 16 is conservative; tunable via constant at top of `index.ts`.
-- No changes to credit deduction logic, no changes to pricing UI.
+**Goal:** Admin ہر prebuilt assistant کے لیے ایک default AI model چن سکے (مثلاً "Coding Expert" → GPT-5، "Marketing Helper" → Gemini Flash)۔ جب user اس assistant سے chat کرے، یہی model خودکار استعمال ہو۔
 
-### Files touched
-- `supabase/migrations/<new>.sql` — new table + RLS
-- `supabase/functions/chat-ai/index.ts` — DB-history fetch, summary injection, summarizer, error fallback
-- `src/pages/ProjectWorkspace.tsx` — health pill, chat_too_long dialog, "Start new chat" handler
+**Database:** کالم `assistants.default_model_id` پہلے سے موجود ہے ✅ — کوئی migration درکار نہیں۔
 
-### Out of scope (per your instruction)
-- Token-based per-message pricing — deferred.
+**Admin UI changes** (`src/components/admin/AdminAssistants.tsx`):
+- Assistant editor dialog میں نیا dropdown: **"Default AI Model"**
+- `ai_models` table سے `is_active = true` models load کر کے Select میں دکھائیں (display_name + provider + credits cost)
+- "None (user choice)" option بھی ہو — یعنی default نہ ہو تو user کا منتخب کردہ model چلے
+- Save پر `default_model_id` update ہو
+- Assistants list میں ہر row پر badge: "Default: GPT-5" یا "Default: User choice"
+
+**User-side behavior:**
+
+1. **`src/pages/Dashboard.tsx`** اور **`src/pages/ProjectWorkspace.tsx`**:
+   - Assistant fetch query میں `default_model_id` شامل کریں
+   - جب user کوئی assistant select کرے:
+     - اگر اس کا `default_model_id` set ہے → model picker میں خودکار وہی model select ہو جائے
+     - چھوٹا badge/note: *"Using {ModelName} (assistant default)"* model picker کے قریب
+     - User چاہے تو manually تبدیل کر سکتا ہے (override allowed)
+
+2. **`supabase/functions/chat-ai/index.ts`**:
+   - Request body میں اگر `assistant_id` آئے اور client نے `model_id` نہ بھیجا ہو، تو `assistants.default_model_id` استعمال کرے
+   - User کا plan check برقرار رہے (`min_plan` validation)
+   - اگر assistant کا default model user کے plan سے بڑا ہو → user کے plan کے لیے دستیاب fallback model پر گرے، toast دکھائیں
+
+---
+
+### Files to be edited / created
+
+**Created:**
+- `src/pages/HelpAssistants.tsx`
+
+**Edited:**
+- `src/App.tsx` — نیا route
+- `src/components/layout/AppSidebar.tsx` — Help link
+- `src/components/admin/AdminAssistants.tsx` — default model dropdown + badge
+- `src/pages/Dashboard.tsx` — assistant select پر default model auto-set
+- `src/pages/ProjectWorkspace.tsx` — same behavior + indicator
+- `supabase/functions/chat-ai/index.ts` — server-side default model fallback
+
+**No DB migration needed** (column پہلے سے موجود ہے)
+
+---
+
+### Out of scope
+- Custom OpenAI/Anthropic API keys (Option B) — اگر بعد میں چاہیں تو الگ plan
+- AI provider settings میں کوئی تبدیلی نہیں — Lovable AI Gateway جوں کا توں
+
