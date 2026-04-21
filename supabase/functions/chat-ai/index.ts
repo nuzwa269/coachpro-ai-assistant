@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     // Ownership check + fetch assistant system prompt server-side
     const { data: convo, error: convoErr } = await serviceClient
       .from("conversations")
-      .select("user_id, assistant_id, assistants ( system_prompt )")
+      .select("user_id, assistant_id, assistants ( system_prompt, default_model_id )")
       .eq("id", conversation_id)
       .maybeSingle();
     if (convoErr || !convo || convo.user_id !== userId) {
@@ -59,11 +59,18 @@ Deno.serve(async (req) => {
     }
     const system_prompt: string | undefined =
       (convo as any).assistants?.system_prompt ?? undefined;
+    const assistantDefaultModel: string | undefined =
+      (convo as any).assistants?.default_model_id ?? undefined;
+
+    // Server-side default model: if the assistant has one configured, it
+    // overrides whatever the client sent. Guarantees the assistant always
+    // uses the brain the admin assigned.
+    const effectiveModelId = assistantDefaultModel || model_id;
 
     const { data: model, error: modelErr } = await serviceClient
       .from("ai_models")
       .select("*")
-      .eq("id", model_id)
+      .eq("id", effectiveModelId)
       .eq("is_active", true)
       .maybeSingle();
     if (modelErr || !model) return json({ error: "Model not found or inactive" }, 404);
