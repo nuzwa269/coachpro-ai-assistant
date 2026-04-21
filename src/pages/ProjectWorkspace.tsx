@@ -20,6 +20,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getTextDir } from "@/lib/text-direction";
 
 function getChatHealth(messages: Array<{ content: string }>) {
   const count = messages.length;
@@ -444,7 +445,13 @@ export default function ProjectWorkspace() {
                                 className="group flex items-start gap-2 rounded-xl border border-border bg-card p-3 text-left text-sm text-foreground transition-colors hover:border-primary hover:bg-primary/5 disabled:opacity-50"
                               >
                                 <Bot className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                                <span className="line-clamp-2">{s}</span>
+                                <span
+                                  className="line-clamp-2"
+                                  dir={getTextDir(s)}
+                                  style={{ textAlign: getTextDir(s) === "rtl" ? "right" : "left" }}
+                                >
+                                  {s}
+                                </span>
                               </button>
                             ))}
                           </div>
@@ -464,7 +471,13 @@ export default function ProjectWorkspace() {
                           <div className={`relative max-w-[85%] break-words rounded-xl px-3.5 py-3 text-sm sm:max-w-[75%] sm:px-4 ${
                             m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                           }`}>
-                            <p className="whitespace-pre-wrap">{m.content}</p>
+                            <p
+                              className="whitespace-pre-wrap"
+                              dir={getTextDir(m.content)}
+                              style={{ textAlign: getTextDir(m.content) === "rtl" ? "right" : "left" }}
+                            >
+                              {m.content}
+                            </p>
                             {m.role === "assistant" && (
                               <button
                                 onClick={() => toggleSave(m)}
@@ -514,6 +527,8 @@ export default function ProjectWorkspace() {
                     placeholder="Ask your AI assistant..."
                     className="h-11 flex-1"
                     disabled={sending}
+                    dir={getTextDir(input)}
+                    style={{ textAlign: getTextDir(input) === "rtl" ? "right" : "left" }}
                   />
                   <Button onClick={handleSend} size="icon" className="h-11 w-11" disabled={sending || !input.trim()}>
                     {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

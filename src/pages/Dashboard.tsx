@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { creditsToMessages, costLabel, DEFAULT_CREDITS_PER_MESSAGE } from "@/lib/credits";
 import { cn } from "@/lib/utils";
+import { getTextDir } from "@/lib/text-direction";
 
 const iconMap: Record<string, React.ElementType> = {
   GraduationCap, Building2, Bug, Lightbulb, Code, Bot,
@@ -309,6 +310,8 @@ export default function Dashboard() {
             }
             className="min-h-[96px] resize-none border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0"
             disabled={sending || !selectedAssistantId}
+            dir={getTextDir(input)}
+            style={{ textAlign: getTextDir(input) === "rtl" ? "right" : "left" }}
           />
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
@@ -359,7 +362,13 @@ export default function Dashboard() {
                     className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:bg-primary/5 disabled:opacity-50"
                   >
                     <Sparkles className="h-3 w-3 shrink-0 text-primary" />
-                    <span className="line-clamp-1 text-left">{s}</span>
+                    <span
+                      className="line-clamp-1"
+                      dir={getTextDir(s)}
+                      style={{ textAlign: getTextDir(s) === "rtl" ? "right" : "left" }}
+                    >
+                      {s}
+                    </span>
                   </button>
                 ))}
               </div>
