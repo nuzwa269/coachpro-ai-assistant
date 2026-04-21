@@ -20,6 +20,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getTextDir } from "@/lib/text-direction";
 
 function getChatHealth(messages: Array<{ content: string }>) {
   const count = messages.length;
