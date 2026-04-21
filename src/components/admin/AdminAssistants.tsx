@@ -241,6 +241,28 @@ export function AdminAssistants() {
                   rows={8}
                 />
               </div>
+
+              <div className="grid gap-2">
+                <Label>Conversation Starters</Label>
+                <p className="text-xs text-muted-foreground">
+                  Up to 5 quick prompts. Shown as clickable chips when a user picks this assistant. Leave empty to skip.
+                </p>
+                <div className="space-y-2">
+                  {form.starters.map((s, i) => (
+                    <Input
+                      key={i}
+                      value={s}
+                      onChange={(e) => {
+                        const next = [...form.starters];
+                        next[i] = e.target.value;
+                        setForm({ ...form, starters: next });
+                      }}
+                      placeholder={`Starter ${i + 1} (e.g. "Help me debug this error…")`}
+                      maxLength={140}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
 
             <DialogFooter>
