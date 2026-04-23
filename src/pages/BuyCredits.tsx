@@ -16,7 +16,7 @@ type Plan = { id: string; name: string; monthly_credits: number; price_pkr: numb
 type Method = "jazzcash" | "easypaisa" | "bank_transfer" | "whatsapp";
 
 const paymentMethods: { id: Method; name: string; value: string; note: string }[] = [
-  { id: "jazzcash", name: "JazzCash", value: "03XX-XXXXXXX", note: "Send payment to the JazzCash mobile account above. Use your full name as the reference." },
+  { id: "jazzcash", name: "JazzCash", value: "0321-4858587", note: "Send payment to the JazzCash mobile account above. Use your full name as the reference." },
   { id: "easypaisa", name: "Easypaisa", value: "03XX-XXXXXXX", note: "Send payment to the Easypaisa account above. Include your email in the message." },
   { id: "bank_transfer", name: "Bank Transfer", value: "IBAN: PK00XXXX0000000000000000", note: "Bank: HBL | Account Title: CoachProAI | Transfer the exact amount." },
   { id: "whatsapp", name: "WhatsApp", value: "+92 3XX XXXXXXX", note: "Send payment screenshot on WhatsApp. We'll verify and add credits within 24 hours." },
