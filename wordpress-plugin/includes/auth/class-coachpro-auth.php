@@ -44,7 +44,7 @@ class CoachPro_Auth {
     // AJAX: Login
     // -------------------------------------------------------------------------
     public static function ajax_login() {
-        check_ajax_referer( 'coachpro_nonce', 'nonce' );
+        check_ajax_referer( 'wp_rest', 'nonce' );
 
         $username = sanitize_text_field( wp_unslash( $_POST['username'] ?? '' ) );
         $password = sanitize_text_field( wp_unslash( $_POST['password'] ?? '' ) );
@@ -67,7 +67,7 @@ class CoachPro_Auth {
     // AJAX: Register
     // -------------------------------------------------------------------------
     public static function ajax_register() {
-        check_ajax_referer( 'coachpro_nonce', 'nonce' );
+        check_ajax_referer( 'wp_rest', 'nonce' );
 
         $username = sanitize_user( wp_unslash( $_POST['username'] ?? '' ) );
         $email    = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
@@ -95,7 +95,7 @@ class CoachPro_Auth {
     // AJAX: Logout
     // -------------------------------------------------------------------------
     public static function ajax_logout() {
-        check_ajax_referer( 'coachpro_nonce', 'nonce' );
+        check_ajax_referer( 'wp_rest', 'nonce' );
         wp_logout();
         wp_send_json_success( array( 'message' => 'Logged out.' ) );
     }

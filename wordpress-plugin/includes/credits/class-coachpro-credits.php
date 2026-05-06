@@ -99,7 +99,7 @@ class CoachPro_Credits {
                 'model_id'     => $model_id,
                 'notes'        => $notes,
             ),
-            array( '%s', '%d', '%d', '%s', '%d', '%s', '%s', '%s', '%s' )
+            array( '%s', '%d', '%d', '%s', '%d', '%s', '%s', '%s' )
         );
     }
 

@@ -257,7 +257,7 @@ class CoachPro_Admin_API {
                 'default_model_id'=> sanitize_text_field( $params['default_model_id'] ?? '' ),
                 'is_active'       => 1,
             ),
-            array( '%s', null, '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d' )
+            array( '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%d' )
         );
 
         return rest_ensure_response( CoachPro_DB::get_row( 'assistants', $id ) );
