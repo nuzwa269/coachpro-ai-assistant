@@ -64,10 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session: existing } }) => {
       setSession(existing);
       setUser(existing?.user ?? null);
+      setLoading(false);
       if (existing?.user) {
-        loadProfileAndRole(existing.user.id).finally(() => setLoading(false));
-      } else {
-        setLoading(false);
+        loadProfileAndRole(existing.user.id);
       }
     });
 
