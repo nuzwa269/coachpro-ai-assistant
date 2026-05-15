@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Send, Bookmark, BookmarkCheck, Bot, User, Plus, ArrowLeft, Menu,
+  Send, Bookmark, BookmarkCheck, Bot, User, Plus, ArrowLeft, Menu, Copy, Check,
   GraduationCap, Building2, Bug, Lightbulb, Code, MessageCircle, MessageSquare, CreditCard, Loader2, Trash2, Info,
 } from "lucide-react";
 import { creditsToMessages, DEFAULT_CREDITS_PER_MESSAGE } from "@/lib/credits";
@@ -59,6 +59,7 @@ export default function ProjectWorkspace() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [assistants, setAssistants] = useState<Assistant[]>([]);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeAssistantIds, setActiveAssistantIds] = useState<Set<string>>(new Set());
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConvoId, setSelectedConvoId] = useState<string>("");
@@ -479,9 +480,10 @@ export default function ProjectWorkspace() {
                               {m.content}
                             </p>
                             {m.role === "assistant" && (
+                              <div className="mt-2 flex items-center gap-2">
                               <button
                                 onClick={() => toggleSave(m)}
-                                className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-background/60 px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-background hover:text-primary"
+                                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background/60 px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-background hover:text-primary"
                                 aria-label={isSaved ? "Unsave" : "Save"}
                               >
                                 {isSaved ? (
@@ -496,6 +498,33 @@ export default function ProjectWorkspace() {
                                   </>
                                 )}
                               </button>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await navigator.clipboard.writeText(m.content);
+                                    setCopiedId(m.id);
+                                    toast.success("Copied to clipboard");
+                                    setTimeout(() => setCopiedId((c) => (c === m.id ? null : c)), 1500);
+                                  } catch {
+                                    toast.error("Failed to copy");
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background/60 px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-background hover:text-primary"
+                                aria-label="Copy response"
+                              >
+                                {copiedId === m.id ? (
+                                  <>
+                                    <Check className="h-3.5 w-3.5 text-primary" />
+                                    <span className="text-primary">Copied</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="h-3.5 w-3.5" />
+                                    <span>Copy</span>
+                                  </>
+                                )}
+                              </button>
+                              </div>
                             )}
                           </div>
                           {m.role === "user" && (
