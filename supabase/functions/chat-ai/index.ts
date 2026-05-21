@@ -36,10 +36,11 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
 
     const body = await req.json();
-    const { conversation_id, model_id } = body as {
+    const { conversation_id, model_id, request_type } = body as {
       conversation_id: string;
       model_id: string;
       messages?: Msg[]; // accepted for backwards compat but ignored
+      request_type?: string;
     };
 
     if (!conversation_id || !model_id) {
@@ -77,12 +78,15 @@ Deno.serve(async (req) => {
 
     const { data: profile } = await serviceClient
       .from("profiles")
-      .select("credits")
+      .select("credits, plan")
       .eq("id", userId)
       .maybeSingle();
     if (!profile || profile.credits < model.credits_cost) {
       return json({ error: `Insufficient credits. Need ${model.credits_cost}.` }, 402);
     }
+
+    // Determine maxOutputTokens based on plan and request type
+    const maxOutputTokens = computeMaxOutputTokens(profile.plan, request_type);
 
     // Fetch full message history from DB (source of truth)
     const { data: allMsgs, error: histErr } = await serviceClient
@@ -113,7 +117,7 @@ Deno.serve(async (req) => {
     // Call provider with retry-on-overflow
     let assistantContent = "";
     try {
-      assistantContent = await callProvider(model, payload);
+      assistantContent = await callProvider(model, payload, maxOutputTokens);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (isContextOverflowError(msg)) {
@@ -141,7 +145,7 @@ Deno.serve(async (req) => {
           keep: AGGRESSIVE_KEEP,
         });
         try {
-          assistantContent = await callProvider(model, retryPayload);
+          assistantContent = await callProvider(model, retryPayload, maxOutputTokens);
         } catch (err2) {
           const msg2 = err2 instanceof Error ? err2.message : String(err2);
           if (isContextOverflowError(msg2)) {
@@ -223,6 +227,13 @@ function json(data: unknown, status = 200) {
   });
 }
 
+function computeMaxOutputTokens(plan: string | undefined, requestType: string | undefined): number {
+  if (requestType && /debug/i.test(requestType)) return 1500;
+  if (plan === "pro") return 3000;
+  // basic and free default to 2000
+  return 2000;
+}
+
 function buildPayload(opts: {
   history: Array<{ role: string; content: string }>;
   systemPrompt?: string;
@@ -261,13 +272,14 @@ function isContextOverflowError(msg: string): boolean {
   );
 }
 
-async function callProvider(model: any, messages: Msg[]): Promise<string> {
+async function callProvider(model: any, messages: Msg[], maxOutputTokens: number): Promise<string> {
   if (model.provider_type === "lovable") {
     return await callOpenAICompat({
       url: "https://ai.gateway.lovable.dev/v1/chat/completions",
       apiKey: Deno.env.get("LOVABLE_API_KEY")!,
       modelName: model.id,
       messages,
+      maxOutputTokens,
     });
   } else if (model.provider_type === "openai_compatible") {
     const apiKey = Deno.env.get(model.api_key_secret_name);
@@ -281,6 +293,7 @@ async function callProvider(model: any, messages: Msg[]): Promise<string> {
       apiKey,
       modelName: model.api_model_name!,
       messages,
+      maxOutputTokens,
     });
   } else if (model.provider_type === "anthropic") {
     const apiKey = Deno.env.get(model.api_key_secret_name);
@@ -292,13 +305,14 @@ async function callProvider(model: any, messages: Msg[]): Promise<string> {
       apiKey,
       modelName: model.api_model_name!,
       messages,
+      maxOutputTokens,
     });
   }
   throw new Error("Unknown provider type");
 }
 
 async function callOpenAICompat(opts: {
-  url: string; apiKey: string; modelName: string; messages: Msg[];
+  url: string; apiKey: string; modelName: string; messages: Msg[]; maxOutputTokens: number;
 }): Promise<string> {
   const resp = await fetch(opts.url, {
     method: "POST",
@@ -309,6 +323,8 @@ async function callOpenAICompat(opts: {
     body: JSON.stringify({
       model: opts.modelName,
       messages: opts.messages,
+      max_tokens: opts.maxOutputTokens,
+      max_completion_tokens: opts.maxOutputTokens,
       stream: false,
     }),
   });
@@ -325,7 +341,7 @@ async function callOpenAICompat(opts: {
 }
 
 async function callAnthropic(opts: {
-  apiKey: string; modelName: string; messages: Msg[];
+  apiKey: string; modelName: string; messages: Msg[]; maxOutputTokens: number;
 }): Promise<string> {
   const systemMsgs = opts.messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
   const convo = opts.messages.filter((m) => m.role !== "system");
@@ -339,7 +355,7 @@ async function callAnthropic(opts: {
     },
     body: JSON.stringify({
       model: opts.modelName,
-      max_tokens: 4096,
+      max_tokens: opts.maxOutputTokens,
       system: systemMsgs || undefined,
       messages: convo,
     }),
