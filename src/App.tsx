@@ -16,6 +16,7 @@ import BuyCredits from "./pages/BuyCredits.tsx";
 import Settings from "./pages/Settings.tsx";
 import Admin from "./pages/Admin.tsx";
 import HelpAssistants from "./pages/HelpAssistants.tsx";
+import Onboarding from "./pages/Onboarding.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 
@@ -29,9 +30,10 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/welcome" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/welcome" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/assistants" element={<ProtectedRoute><Assistants /></ProtectedRoute>} />

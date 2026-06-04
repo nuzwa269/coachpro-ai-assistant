@@ -20,7 +20,7 @@ export default function Signup() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   if (!authLoading && user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/welcome" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,7 +30,7 @@ export default function Signup() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin + "/dashboard",
+        emailRedirectTo: window.location.origin + "/welcome",
         data: { name },
       },
     });
@@ -41,7 +41,7 @@ export default function Signup() {
     }
     if (data.session) {
       toast.success("Account ban gaya! 20 free credits mil gaye.");
-      navigate("/dashboard", { replace: true });
+      navigate("/welcome", { replace: true });
     } else {
       toast.success("Check your email to confirm your account.");
     }
@@ -49,14 +49,14 @@ export default function Signup() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/welcome" });
     if (result.error) {
       setGoogleLoading(false);
       toast.error("Google sign-up failed. Try again.");
       return;
     }
     if (result.redirected) return;
-    navigate("/dashboard", { replace: true });
+    navigate("/welcome", { replace: true });
   };
 
   return (

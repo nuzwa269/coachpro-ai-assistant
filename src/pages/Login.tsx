@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +12,8 @@ import logo from "@/assets/logo.png";
 
 export default function Login() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = (location.state as { from?: string } | null)?.from ?? "/dashboard";
+  // Authenticated users always land on the onboarding page before entering the dashboard.
+  const from = "/welcome";
   const { user, loading: authLoading } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -40,14 +40,14 @@ export default function Login() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/welcome" });
     if (result.error) {
       setGoogleLoading(false);
       toast.error("Google sign-in failed. Try again.");
       return;
     }
     if (result.redirected) return;
-    navigate("/dashboard", { replace: true });
+    navigate("/welcome", { replace: true });
   };
 
   return (
