@@ -1,5 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import type { ElementType } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -239,22 +238,6 @@ const benefits = [
 ];
 
 export default function Index() {
-  const location = useLocation();
-
-  useEffect(() => {
-    if (!location.hash) return;
-
-    const sectionId = location.hash.replace("#", "");
-    const scrollToSection = window.setTimeout(() => {
-      document.getElementById(sectionId)?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 0);
-
-    return () => window.clearTimeout(scrollToSection);
-  }, [location.hash]);
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -299,7 +282,7 @@ export default function Index() {
             </div>
 
             <div className="relative mx-auto w-full max-w-xl animate-float-slow">
-              <div className="absolute -inset-6 rounded-[2rem] bg-secondary/15 blur-2xl" />
+              <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-primary/25 via-secondary/20 to-transparent blur-2xl" />
               <div className="relative overflow-hidden rounded-[2rem] border border-white/40 bg-card/85 p-5 shadow-2xl shadow-secondary/10 backdrop-blur-xl">
                 <div className="mb-5 flex items-center justify-between rounded-2xl bg-muted/60 p-3">
                   <div>
@@ -363,7 +346,7 @@ export default function Index() {
         </section>
 
         <section id="ai-assistants" className="relative overflow-hidden py-20">
-          <div className="absolute inset-x-0 top-0 h-40 bg-primary/5" />
+          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/5 to-transparent" />
           <div className="container relative">
             <div className="mb-12 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
@@ -408,7 +391,7 @@ export default function Index() {
           </div>
         </section>
 
-        <section id="how-it-works" className="section-purple py-20 text-white">
+        <section id="how-it-works" className="section-purple-gradient py-20 text-white">
           <div className="container">
             <div className="mx-auto mb-12 max-w-3xl text-center">
               <Badge className="rounded-full bg-white/15 text-white hover:bg-white/15">How It Works</Badge>
@@ -451,7 +434,7 @@ export default function Index() {
               </div>
             </div>
             <div className="relative">
-              <div className="absolute -inset-4 rounded-[2rem] bg-secondary/15 blur-2xl" />
+              <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/20 to-secondary/20 blur-2xl" />
               <div className="relative grid gap-4 rounded-[2rem] border border-border bg-card p-5 shadow-2xl sm:grid-cols-2">
                 {[
                   { icon: BookOpen, label: "Learn", text: "Explain concepts and practice skills." },
@@ -474,7 +457,7 @@ export default function Index() {
         </section>
 
         <section className="px-4 pb-20 sm:px-6 lg:px-8">
-          <div className="container overflow-hidden rounded-[2rem] bg-brand-dark p-8 text-center text-white shadow-2xl md:p-12">
+          <div className="container overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-dark via-secondary to-primary p-8 text-center text-white shadow-2xl md:p-12">
             <div className="mx-auto max-w-3xl">
               <Sparkles className="mx-auto h-10 w-10 text-white" />
               <h2 className="mt-5 font-heading text-3xl font-bold sm:text-4xl">Ready to meet your AI coaching team?</h2>
