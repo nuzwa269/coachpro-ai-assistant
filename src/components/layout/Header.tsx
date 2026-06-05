@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import type { MouseEvent } from "react";
 import { Menu, X, User, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -41,6 +42,7 @@ export function Header() {
               key={l.href}
               to={l.href}
               className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+              onClick={(event) => handleNavClick(event, l.href)}
             >
               {l.label}
             </Link>
@@ -84,7 +86,7 @@ export function Header() {
                 key={l.href}
                 to={l.href}
                 className="text-sm font-medium text-muted-foreground"
-                onClick={() => setMobileOpen(false)}
+                onClick={(event) => handleNavClick(event, l.href)}
               >
                 {l.label}
               </Link>
