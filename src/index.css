@@ -4,25 +4,32 @@
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 220 20% 10%;
+    --color-primary-orange: #FF8A00;
+    --color-secondary-purple: #9333EA;
+    --color-text-main: #111827;
+    --color-text-muted: #4B5563;
+    --color-bg-main: #FAFAFA;
+    --color-bg-dark: #0A0A0A;
+
+    --background: 0 0% 98%;
+    --foreground: 221 39% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 221 39% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 221 39% 11%;
 
-    --primary: 33 100% 50%;
+    --primary: 32 100% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 82% 56%;
+    --secondary: 271 81% 56%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 43%;
+    --muted-foreground: 217 19% 35%;
 
-    --accent: 270 82% 56%;
+    --accent: 271 81% 56%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -30,26 +37,25 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 33 100% 50%;
+    --ring: 32 100% 50%;
 
     --radius: 0.75rem;
 
-    --brand-orange: 33 100% 50%;
-    --brand-orange-hover: 33 100% 45%;
-    --brand-purple: 270 82% 56%;
+    --brand-orange: 32 100% 50%;
+    --brand-orange-hover: 32 100% 45%;
+    --brand-purple: 271 81% 56%;
     --brand-dark: 0 0% 4%;
     --brand-light: 0 0% 98%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 20% 10%;
-    --sidebar-primary: 33 100% 50%;
+    --sidebar-foreground: 221 39% 11%;
+    --sidebar-primary: 32 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 270 82% 10%;
+    --sidebar-accent: 271 81% 14%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 33 100% 50%;
+    --sidebar-ring: 32 100% 50%;
   }
-
   .dark {
     --background: 0 0% 4%;
     --foreground: 0 0% 98%;
@@ -60,16 +66,16 @@
     --popover: 0 0% 7%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 33 100% 50%;
+    --primary: 32 100% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 82% 56%;
+    --secondary: 271 81% 56%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 220 10% 15%;
     --muted-foreground: 220 10% 60%;
 
-    --accent: 270 82% 56%;
+    --accent: 271 81% 56%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 31%;
@@ -77,16 +83,16 @@
 
     --border: 220 10% 18%;
     --input: 220 10% 18%;
-    --ring: 33 100% 50%;
+    --ring: 32 100% 50%;
 
     --sidebar-background: 0 0% 7%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 33 100% 50%;
+    --sidebar-primary: 32 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 270 82% 20%;
+    --sidebar-accent: 271 81% 20%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 10% 18%;
-    --sidebar-ring: 33 100% 50%;
+    --sidebar-ring: 32 100% 50%;
   }
 }
 
@@ -106,44 +112,46 @@
   }
 }
 
-/* Hero background gradient matching coachproai.com warm tech aesthetic */
-.hero-bg {
-  background: linear-gradient(135deg, 
-    hsl(30 80% 95%) 0%, 
-    hsl(0 0% 97%) 30%, 
-    hsl(250 40% 96%) 70%, 
-    hsl(270 50% 95%) 100%
-  );
-  position: relative;
+.section-warm {
+  background: var(--color-bg-main);
 }
 
-.hero-bg::before {
-  content: '';
+.section-purple {
+  background: var(--color-secondary-purple);
+}
+
+.landing-hero {
+  background: var(--color-bg-main);
+}
+
+.landing-hero::before {
+  content: "";
   position: absolute;
   inset: 0;
-  background: 
-    radial-gradient(ellipse at 0% 50%, hsl(33 100% 50% / 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 100% 0%, hsl(270 82% 56% / 0.06) 0%, transparent 50%);
+  background-color: rgb(255 138 0 / 0.04);
   pointer-events: none;
 }
 
-/* Geometric pattern overlay for hero */
-.hero-pattern {
-  background-image: 
-    linear-gradient(30deg, hsl(33 100% 50% / 0.03) 12%, transparent 12.5%, transparent 87%, hsl(33 100% 50% / 0.03) 87.5%),
-    linear-gradient(150deg, hsl(33 100% 50% / 0.03) 12%, transparent 12.5%, transparent 87%, hsl(33 100% 50% / 0.03) 87.5%),
-    linear-gradient(30deg, hsl(33 100% 50% / 0.03) 12%, transparent 12.5%, transparent 87%, hsl(33 100% 50% / 0.03) 87.5%),
-    linear-gradient(150deg, hsl(33 100% 50% / 0.03) 12%, transparent 12.5%, transparent 87%, hsl(33 100% 50% / 0.03) 87.5%);
-  background-size: 80px 140px;
-  background-position: 0 0, 0 0, 40px 70px, 40px 70px;
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
 }
 
-/* Section divider with warm gradient */
-.section-warm {
-  background: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(30 30% 97%) 100%);
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
 }
 
-/* Purple gradient section matching reference */
-.section-purple-gradient {
-  background: linear-gradient(135deg, hsl(270 82% 56%) 0%, hsl(239 84% 55%) 100%);
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-slow,
+  .animate-fade-in {
+    animation: none !important;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 5rem;
 }
