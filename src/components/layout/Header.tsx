@@ -2,14 +2,14 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, User, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { mockUser } from "@/data/mock-data";
 import logo from "@/assets/logo.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
-  { label: "EduPro", href: "/#features" },
-  { label: "Tools", href: "/assistants" },
-  { label: "Plans & Credits", href: "/buy-credits" },
-  { label: "Member Pro", href: "/dashboard" },
+  { label: "Features", href: "/#features" },
+  { label: "AI Assistants", href: "/#ai-assistants" },
+  { label: "How It Works", href: "/#how-it-works" },
+  { label: "Benefits", href: "/#benefits" },
 ];
 
 const authLinks = [
@@ -22,8 +22,9 @@ const authLinks = [
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const isLoggedIn = location.pathname !== "/" && location.pathname !== "/login" && location.pathname !== "/signup";
-  const links = isLoggedIn ? authLinks : navLinks;
+  const { user, profile } = useAuth();
+  const isLoggedIn = Boolean(user);
+  const links = isLoggedIn && location.pathname !== "/" ? authLinks : navLinks;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-md">
@@ -52,7 +53,7 @@ export function Header() {
             <>
               <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm font-medium">
                 <CreditCard className="h-4 w-4 text-primary" />
-                {mockUser.credits} Credits
+                {profile?.credits ?? 0} Credits
               </div>
               <Link to="/settings">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -62,7 +63,7 @@ export function Header() {
             </>
           ) : (
             <Button asChild className="rounded-full bg-primary px-6 font-semibold text-primary-foreground hover:bg-brand-orange-hover">
-              <Link to="/login">LOGIN / SIGN UP</Link>
+              <Link to="/login">LOGIN</Link>
             </Button>
           )}
         </div>
@@ -90,7 +91,7 @@ export function Header() {
             ))}
             {!isLoggedIn && (
               <Button asChild className="mt-2 rounded-full">
-                <Link to="/login">LOGIN / SIGN UP</Link>
+                <Link to="/login">LOGIN</Link>
               </Button>
             )}
           </nav>

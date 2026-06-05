@@ -16,6 +16,7 @@ import BuyCredits from "./pages/BuyCredits.tsx";
 import Settings from "./pages/Settings.tsx";
 import Admin from "./pages/Admin.tsx";
 import HelpAssistants from "./pages/HelpAssistants.tsx";
+import Index from "./pages/Index.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
 
@@ -29,7 +30,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
