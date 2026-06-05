@@ -27,27 +27,6 @@ export function Header() {
   const isLoggedIn = Boolean(user);
   const links = isLoggedIn && location.pathname !== "/" ? authLinks : navLinks;
 
-  const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (!href.startsWith("/#")) {
-      setMobileOpen(false);
-      return;
-    }
-
-    setMobileOpen(false);
-
-    if (location.pathname !== "/") {
-      return;
-    }
-
-    event.preventDefault();
-    const sectionId = href.slice(2);
-    document.getElementById(sectionId)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-    window.history.pushState(null, "", href);
-  };
-
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between">
