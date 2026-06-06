@@ -1,5 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import type { ElementType } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -451,7 +450,7 @@ export default function Index() {
               </div>
             </div>
             <div className="relative">
-              <div className="absolute -inset-4 rounded-[2rem] bg-secondary/15 blur-2xl" />
+              <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/20 to-secondary/20 blur-2xl" />
               <div className="relative grid gap-4 rounded-[2rem] border border-border bg-card p-5 shadow-2xl sm:grid-cols-2">
                 {[
                   { icon: BookOpen, label: "Learn", text: "Explain concepts and practice skills." },
