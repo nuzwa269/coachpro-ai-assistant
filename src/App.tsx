@@ -3,7 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
@@ -16,10 +16,26 @@ import BuyCredits from "./pages/BuyCredits.tsx";
 import Settings from "./pages/Settings.tsx";
 import Admin from "./pages/Admin.tsx";
 import HelpAssistants from "./pages/HelpAssistants.tsx";
+import Index from "./pages/Index.tsx";
 
 import NotFound from "./pages/NotFound.tsx";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
+
+function HomeRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return user ? <Navigate to="/dashboard" replace /> : <Index />;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,7 +45,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<HomeRoute />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
