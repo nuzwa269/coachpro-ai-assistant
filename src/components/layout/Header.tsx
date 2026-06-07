@@ -1,5 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 import type { MouseEvent } from "react";
+
+function handleNavClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
+  if (!href.includes("#")) return;
+  const [path, hash] = href.split("#");
+  if ((path === "" || path === "/") && window.location.pathname === "/") {
+    event.preventDefault();
+    document.getElementById(hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
 import { Menu, X, User, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";

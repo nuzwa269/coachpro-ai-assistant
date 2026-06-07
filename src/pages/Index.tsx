@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import type { ElementType } from "react";
+import { useEffect, type ElementType } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
