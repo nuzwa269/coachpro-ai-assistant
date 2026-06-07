@@ -238,6 +238,22 @@ const benefits = [
 ];
 
 export default function Index() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash) return;
+
+    const sectionId = location.hash.replace("#", "");
+    const scrollToSection = window.setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+
+    return () => window.clearTimeout(scrollToSection);
+  }, [location.hash]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -282,7 +298,7 @@ export default function Index() {
             </div>
 
             <div className="relative mx-auto w-full max-w-xl animate-float-slow">
-              <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-primary/25 via-secondary/20 to-transparent blur-2xl" />
+              <div className="absolute -inset-6 rounded-[2rem] bg-secondary/15 blur-2xl" />
               <div className="relative overflow-hidden rounded-[2rem] border border-white/40 bg-card/85 p-5 shadow-2xl shadow-secondary/10 backdrop-blur-xl">
                 <div className="mb-5 flex items-center justify-between rounded-2xl bg-muted/60 p-3">
                   <div>
@@ -346,7 +362,7 @@ export default function Index() {
         </section>
 
         <section id="ai-assistants" className="relative overflow-hidden py-20">
-          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/5 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-40 bg-primary/5" />
           <div className="container relative">
             <div className="mb-12 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
@@ -391,26 +407,26 @@ export default function Index() {
           </div>
         </section>
 
-        <section id="how-it-works" className="section-purple-gradient py-20 text-white">
+        <section id="how-it-works" className="bg-[#FAFAFA] py-20 text-[#111827]">
           <div className="container">
             <div className="mx-auto mb-12 max-w-3xl text-center">
-              <Badge className="rounded-full bg-white/15 text-white hover:bg-white/15">How It Works</Badge>
-              <h2 className="mt-4 font-heading text-3xl font-bold sm:text-4xl">From first visit to first AI outcome</h2>
-              <p className="mt-3 text-white/80">A guided onboarding flow turns project instructions and in-app help into a clear path for new users.</p>
+              <Badge className="rounded-full border border-[#9333EA]/25 bg-[#9333EA]/10 text-[#9333EA] hover:bg-[#9333EA]/10">How It Works</Badge>
+              <h2 className="mt-4 font-heading text-3xl font-bold text-[#111827] sm:text-4xl">From first visit to first AI outcome</h2>
+              <p className="mt-3 text-[#4B5563]">A guided onboarding flow turns project instructions and in-app help into a clear path for new users.</p>
             </div>
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {steps.map((step, index) => {
                 const Icon = step.icon;
                 return (
-                  <div key={step.title} className="group rounded-[1.75rem] border border-white/15 bg-white/10 p-6 shadow-xl backdrop-blur transition-all hover:-translate-y-2 hover:bg-white/15">
+                  <div key={step.title} className="group rounded-[1.75rem] border border-border bg-white p-6 text-[#111827] shadow-xl transition-all hover:-translate-y-2 hover:border-[#FF8A00]/35 hover:shadow-2xl">
                     <div className="mb-5 flex items-center justify-between">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-secondary shadow-lg">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#9333EA]/10 text-[#9333EA] shadow-lg">
                         <Icon className="h-6 w-6" />
                       </div>
-                      <span className="font-heading text-4xl font-black text-white/20">0{index + 1}</span>
+                      <span className="font-heading text-4xl font-black text-[#9333EA]/20">0{index + 1}</span>
                     </div>
-                    <h3 className="font-heading text-xl font-semibold">{step.title}</h3>
-                    <p className="mt-2 text-sm text-white/78">{step.body}</p>
+                    <h3 className="font-heading text-xl font-semibold text-[#111827]">{step.title}</h3>
+                    <p className="mt-2 text-sm text-[#4B5563]">{step.body}</p>
                   </div>
                 );
               })}
@@ -457,7 +473,7 @@ export default function Index() {
         </section>
 
         <section className="px-4 pb-20 sm:px-6 lg:px-8">
-          <div className="container overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-dark via-secondary to-primary p-8 text-center text-white shadow-2xl md:p-12">
+          <div className="container overflow-hidden rounded-[2rem] bg-brand-dark p-8 text-center text-white shadow-2xl md:p-12">
             <div className="mx-auto max-w-3xl">
               <Sparkles className="mx-auto h-10 w-10 text-white" />
               <h2 className="mt-5 font-heading text-3xl font-bold sm:text-4xl">Ready to meet your AI coaching team?</h2>
