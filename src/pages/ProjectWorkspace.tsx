@@ -52,10 +52,12 @@ type Message = {
   isSaved?: boolean;
 };
 
+const MAX_HISTORY_MESSAGES = 20;
+
 export default function ProjectWorkspace() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, updateCreditsLocally } = useAuth();
 
   const [project, setProject] = useState<Project | null>(null);
   const [assistants, setAssistants] = useState<Assistant[]>([]);
@@ -210,11 +212,14 @@ export default function ProjectWorkspace() {
       return;
     }
 
-    // Build full message history for context (include the just-inserted user msg)
-    const history = [...messages, userMsg as Message].map((m) => ({
+    const rawHistory = [...messages, userMsg as Message].map((m) => ({
       role: m.role as "user" | "assistant",
       content: m.content,
     }));
+    const history =
+      rawHistory.length > MAX_HISTORY_MESSAGES
+        ? rawHistory.slice(-MAX_HISTORY_MESSAGES)
+        : rawHistory;
 
     try {
       const { data, error } = await supabase.functions.invoke("chat-ai", {
@@ -227,11 +232,9 @@ export default function ProjectWorkspace() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
       const aiMsg = data.message as Message;
       setMessages((prev) => [...prev, aiMsg]);
-      // Refresh credits in header/sidebar
-      await refreshProfile();
+      updateCreditsLocally((profile?.credits ?? 0) - DEFAULT_CREDITS_PER_MESSAGE);
     } catch (err: any) {
       const msg = err?.message || err?.context?.error || "AI request failed";
       const errCode = err?.context?.error || (typeof err?.message === "string" && err.message);

@@ -45,6 +45,8 @@ const SUGGESTED_PROMPTS = [
 ];
 
 function ProBanner({ onDismiss }: { onDismiss: () => void }) {
+  const navigate = useNavigate();
+
   return (
     <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-background p-4 shadow-sm">
       <button
@@ -71,7 +73,7 @@ function ProBanner({ onDismiss }: { onDismiss: () => void }) {
         <Button
           size="sm"
           className="h-9 shrink-0 gap-1.5 text-xs sm:h-10 sm:px-4"
-          onClick={() => window.location.href = "/buy-credits"}
+          onClick={() => navigate("/buy-credits")}
         >
           Upgrade <ArrowRight className="h-3.5 w-3.5" />
         </Button>

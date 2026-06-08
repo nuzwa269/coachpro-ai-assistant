@@ -19,6 +19,7 @@ type AuthContextValue = {
   isAdmin: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
+  updateCreditsLocally: (newCredits: number) => void;
   signOut: () => Promise<void>;
 };
 
@@ -77,6 +78,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await loadProfileAndRole(user.id);
   }, [user, loadProfileAndRole]);
 
+  const updateCreditsLocally = useCallback((newCredits: number) => {
+    setProfile((prev) => (prev ? { ...prev, credits: Math.max(0, newCredits) } : prev));
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setProfile(null);
@@ -84,7 +89,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, isAdmin, loading, refreshProfile, signOut }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        user,
+        profile,
+        isAdmin,
+        loading,
+        refreshProfile,
+        updateCreditsLocally,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
