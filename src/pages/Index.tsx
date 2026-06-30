@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { prebuiltAssistants, customAssistants } from "@/data/mock-data";
 import {
   ArrowRight,
@@ -492,7 +491,10 @@ export default function Index() {
         </section>
       </main>
 
-      <Footer />
+      {/* Minimal copyright bar — landing page does not need the full app footer */}
+      <div className="bg-muted py-4 text-center text-xs text-muted-foreground sm:text-sm">
+        &copy; {new Date().getFullYear()} CoachPro AI. All Rights Reserved.
+      </div>
     </div>
   );
 }
