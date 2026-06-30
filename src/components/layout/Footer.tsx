@@ -48,7 +48,7 @@ export function Footer() {
 
       {/* Bottom bar */}
       <div className="bg-muted py-4 text-center text-xs text-muted-foreground sm:text-sm">
-        &copy; {new Date().getFullYear()} CoachPro AI | Developed by Codfusion.
+        &copy; {new Date().getFullYear()} CoachPro AI. All Rights Reserved.
       </div>
     </footer>
   );
