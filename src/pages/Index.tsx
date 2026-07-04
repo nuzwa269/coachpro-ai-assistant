@@ -20,9 +20,11 @@ import {
   Cpu,
   FileText,
   FolderOpen,
+  Globe,
   GraduationCap,
   Image,
   Layers,
+  LayoutDashboard,
   Lightbulb,
   Lock,
   MessageSquare,
@@ -31,8 +33,10 @@ import {
   PlayCircle,
   Rocket,
   ShieldCheck,
+  Smartphone,
   Sparkles,
   Star,
+  TrendingUp,
   Users,
   Wand2,
   Zap,
@@ -44,6 +48,12 @@ const iconMap: Record<string, ElementType> = {
   Bug,
   Lightbulb,
   Code,
+  Rocket,
+  TrendingUp,
+  Layers,
+  Globe,
+  LayoutDashboard,
+  Smartphone,
 };
 
 const heroStats = [
@@ -155,26 +165,55 @@ const capabilities = [
   },
 ];
 
+const assistantUseOutcome: Record<string, { use: string; outcome: string }> = {
+  "AI MASTER": {
+    use: "Use it when you want to learn coding, AI, SaaS, or WordPress from beginner to professional level.",
+    outcome: "Clear understanding of complex tech concepts explained at your current level.",
+  },
+  "IDEA MASTER": {
+    use: "Use it when you need realistic startup or SaaS ideas that match your skills and budget.",
+    outcome: "Validated, buildable business ideas with clear next steps and market logic.",
+  },
+  "STARTUP ROCKET": {
+    use: "Use it when you have an idea and need a step-by-step path to validate, build an MVP, and launch.",
+    outcome: "A practical launch roadmap with real-world payment and pricing guidance.",
+  },
+  "MARKETING MASTER": {
+    use: "Use it when you need SEO, content strategy, paid ads, or growth tactics for any budget.",
+    outcome: "Data-driven marketing plans from zero-budget tactics to paid campaigns.",
+  },
+  "BLUEPRINT ARCHITECT": {
+    use: "Use it when you have a complex enterprise idea (POS, ERP, School Management) and need a complete technical blueprint.",
+    outcome: "A complete Master Prompt ready to paste into any AI coding tool.",
+  },
+  "CODESATHI": {
+    use: "Use it when building websites, web apps, SaaS products, or browser extensions hands-on.",
+    outcome: "Production-ready code with security best practices and clean architecture baked in.",
+  },
+  "WORDPRESS BUSINESS ARCHITECT": {
+    use: "Use it when you need custom business software as a WordPress plugin (Gym, Clinic, Tailor Shop, etc.).",
+    outcome: "Production-ready WordPress plugins using pure native PHP and jQuery.",
+  },
+  "DASHBOARD ARCHITECT": {
+    use: "Use it when you need a high-performance admin dashboard with charts, logs, and CRUD systems.",
+    outcome: "A complete admin dashboard built with Next.js and Supabase.",
+  },
+  "MOBILE ARCHITECT PRO": {
+    use: "Use it when you need a mobile app for Web, Android, and iOS using Flutter or native Kotlin.",
+    outcome: "Real working Flutter or native Android code from a single shared codebase.",
+  },
+  "BUG FIXER PRO": {
+    use: "Use it when you have bugs or errors across any stack and need root cause analysis.",
+    outcome: "Fixed bugs with root causes identified, never just symptoms hidden.",
+  },
+};
+
 const assistantCards = [
   ...prebuiltAssistants.map((assistant) => ({
     name: assistant.name,
     description: assistant.description,
-    use:
-      assistant.name === "Code Tutor"
-        ? "Use it when you are learning a programming concept, framework, hook, or coding pattern."
-        : assistant.name === "System Architect"
-          ? "Use it before building a larger app, service, data flow, or system design."
-          : assistant.name === "Debug Helper"
-            ? "Use it when code breaks, errors are unclear, or you need a step-by-step debugging path."
-            : "Use it when technical topics feel complex and you need a plain-language explanation.",
-    outcome:
-      assistant.name === "Code Tutor"
-        ? "Clear examples, guided practice, and confidence with new programming ideas."
-        : assistant.name === "System Architect"
-          ? "A scalable plan for components, services, data boundaries, and implementation tradeoffs."
-          : assistant.name === "Debug Helper"
-            ? "A narrowed root cause, safer fixes, and a repeatable debugging checklist."
-            : "Simpler mental models that make hard concepts easier to remember and apply.",
+    use: assistantUseOutcome[assistant.name]?.use ?? "Use it when you need expert help in this area.",
+    outcome: assistantUseOutcome[assistant.name]?.outcome ?? "Practical, actionable results from your coaching session.",
     icon: iconMap[assistant.icon] ?? Bot,
     category: assistant.category,
   })),
@@ -186,15 +225,6 @@ const assistantCards = [
     icon: iconMap[assistant.icon] ?? Wand2,
     category: assistant.category,
   })),
-  ...educationSuite.map((tool) => ({
-    name: tool.title,
-    description: "Education-focused AI capability for teachers, learners, and creators.",
-    use: tool.use,
-    outcome: tool.outcome,
-    icon: tool.icon,
-    category: "Education Suite",
-  })),
-  ...capabilities.map((tool) => ({ ...tool, name: tool.title, icon: tool.icon, category: "AI Capability" })),
 ];
 
 const steps = [
@@ -367,7 +397,7 @@ export default function Index() {
             <div className="mb-12 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
                 <Badge className="rounded-full bg-secondary/10 text-secondary hover:bg-secondary/10">AI Assistants Overview</Badge>
-                <h2 className="mt-4 font-heading text-3xl font-bold sm:text-4xl">Specialist assistants, education tools, and AI-powered capabilities</h2>
+                <h2 className="mt-4 font-heading text-3xl font-bold sm:text-4xl">10 specialist AI assistants for learning, building, and growing</h2>
                 <p className="mt-3 text-muted-foreground">Each card explains what the assistant does, when to use it, and the practical outcome users can expect after signing in.</p>
               </div>
               <Button asChild variant="outline" className="rounded-full">
