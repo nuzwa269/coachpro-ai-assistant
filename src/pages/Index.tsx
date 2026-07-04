@@ -397,7 +397,7 @@ export default function Index() {
             <div className="mb-12 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
                 <Badge className="rounded-full bg-secondary/10 text-secondary hover:bg-secondary/10">AI Assistants Overview</Badge>
-                <h2 className="mt-4 font-heading text-3xl font-bold sm:text-4xl">Specialist assistants, education tools, and AI-powered capabilities</h2>
+                <h2 className="mt-4 font-heading text-3xl font-bold sm:text-4xl">10 specialist AI assistants for learning, building, and growing</h2>
                 <p className="mt-3 text-muted-foreground">Each card explains what the assistant does, when to use it, and the practical outcome users can expect after signing in.</p>
               </div>
               <Button asChild variant="outline" className="rounded-full">
