@@ -48,6 +48,12 @@ const iconMap: Record<string, ElementType> = {
   Bug,
   Lightbulb,
   Code,
+  Rocket,
+  TrendingUp,
+  Layers,
+  Globe,
+  LayoutDashboard,
+  Smartphone,
 };
 
 const heroStats = [
