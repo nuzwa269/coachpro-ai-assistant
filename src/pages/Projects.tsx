@@ -141,7 +141,7 @@ export default function Projects() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((p) => (
-              <div key={p.id} className="group relative rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary">
+              <div key={p.id} className="group relative flex flex-col rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary">
                 <Link to={`/project/${p.id}`} className="block">
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                     <FolderOpen className="h-5 w-5 text-primary" />
@@ -149,14 +149,33 @@ export default function Projects() {
                   <h3 className="font-heading text-base font-semibold text-foreground">{p.name}</h3>
                   <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.description || "No description"}</p>
                 </Link>
-                <div className="mt-3 flex gap-1">
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(p)}>
-                    <Pencil className="h-3.5 w-3.5" />
+                <div className="mt-4 flex gap-2 border-t border-border pt-3">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-9 flex-1 gap-1.5"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openEdit(p);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4" /> Edit
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button size="icon" variant="ghost" className="h-8 w-8">
-                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-9 flex-1 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" /> Delete
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -168,7 +187,12 @@ export default function Projects() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(p.id)}>Delete</AlertDialogAction>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(p.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
