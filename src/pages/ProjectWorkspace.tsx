@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getTextDir } from "@/lib/text-direction";
+import { AssistantMessage } from "@/components/chat/AssistantMessage";
 
 function getChatHealth(messages: Array<{ content: string }>) {
   const count = messages.length;
@@ -472,13 +473,17 @@ export default function ProjectWorkspace() {
                           <div className={`relative max-w-[85%] break-words rounded-xl px-3.5 py-3 text-sm sm:max-w-[75%] sm:px-4 ${
                             m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                           }`}>
-                            <p
-                              className="whitespace-pre-wrap"
-                              dir={getTextDir(m.content)}
-                              style={{ textAlign: getTextDir(m.content) === "rtl" ? "right" : "left" }}
-                            >
-                              {m.content}
-                            </p>
+                            {m.role === "assistant" ? (
+                              <AssistantMessage content={m.content} />
+                            ) : (
+                              <p
+                                className="whitespace-pre-wrap"
+                                dir={getTextDir(m.content)}
+                                style={{ textAlign: getTextDir(m.content) === "rtl" ? "right" : "left" }}
+                              >
+                                {m.content}
+                              </p>
+                            )}
                             {m.role === "assistant" && (
                               <div className="mt-2 flex items-center gap-2">
                               <button

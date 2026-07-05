@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
+import { AssistantMessage } from "@/components/chat/AssistantMessage";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -219,7 +220,9 @@ export default function SavedResponses() {
                     </Button>
                   </div>
                 </div>
-                <p className="whitespace-pre-wrap text-sm text-foreground">{m.message_content}</p>
+                <div className="text-sm text-foreground">
+                  <AssistantMessage content={m.message_content} />
+                </div>
               </div>
             ))}
           </div>
