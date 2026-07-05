@@ -219,7 +219,9 @@ export default function SavedResponses() {
                     </Button>
                   </div>
                 </div>
-                <p className="whitespace-pre-wrap text-sm text-foreground">{m.message_content}</p>
+                <div className="text-sm text-foreground">
+                  <AssistantMessage content={m.message_content} />
+                </div>
               </div>
             ))}
           </div>
