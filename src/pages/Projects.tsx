@@ -130,12 +130,12 @@ export default function Projects() {
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 <div className="space-y-1.5">
-                  <Label>Project Name</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="My Awesome Project" />
+                  <Label htmlFor="project-name">Project Name</Label>
+                  <Input id="project-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="My Awesome Project" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Description</Label>
-                  <Textarea value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What is this project about?" />
+                  <Label htmlFor="project-description">Description</Label>
+                  <Textarea id="project-description" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What is this project about?" />
                 </div>
                 <Button onClick={handleSubmit} disabled={submitting} className="w-full">
                   {submitting ? "Saving..." : editing ? "Save Changes" : "Create Project"}
