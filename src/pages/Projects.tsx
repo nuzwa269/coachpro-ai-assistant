@@ -175,7 +175,6 @@ export default function Projects() {
                     variant="outline"
                     className="h-9 flex-1 gap-1.5"
                     onClick={(e) => {
-                      e.preventDefault();
                       e.stopPropagation();
                       openEdit(p);
                     }}
@@ -190,7 +189,6 @@ export default function Projects() {
                         variant="outline"
                         className="h-9 flex-1 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
                         onClick={(e) => {
-                          e.preventDefault();
                           e.stopPropagation();
                         }}
                       >
