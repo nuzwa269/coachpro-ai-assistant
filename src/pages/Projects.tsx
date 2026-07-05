@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,18 +29,27 @@ export default function Projects() {
   const [desc, setDesc] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
-    supabase
+  const fetchProjects = useCallback(async () => {
+    if (!user) {
+      setProjects([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const { data, error } = await supabase
       .from("projects")
       .select("id,name,description,created_at")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) toast.error(error.message);
-        else setProjects(data ?? []);
-        setLoading(false);
-      });
+    if (error) toast.error(error.message);
+    else setProjects(data ?? []);
+    setLoading(false);
   }, [user]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const openCreate = () => {
     setEditing(null);
@@ -64,11 +73,13 @@ export default function Projects() {
         .from("projects")
         .update({ name: name.trim(), description: desc.trim() || null })
         .eq("id", editing.id)
+        .eq("user_id", user.id)
         .select("id,name,description,created_at")
-        .single();
+        .maybeSingle();
       setSubmitting(false);
       if (error) return toast.error(error.message);
-      setProjects(projects.map((p) => (p.id === data.id ? data : p)));
+      if (!data) return toast.error("Project not found or you do not have permission to edit it.");
+      setProjects((current) => current.map((p) => (p.id === data.id ? data : p)));
       toast.success("Project updated");
     } else {
       const { data, error } = await supabase
@@ -78,16 +89,24 @@ export default function Projects() {
         .single();
       setSubmitting(false);
       if (error) return toast.error(error.message);
-      setProjects([data, ...projects]);
+      setProjects((current) => [data, ...current]);
       toast.success("Project created");
     }
     setOpen(false);
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("projects").delete().eq("id", id);
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select("id")
+      .maybeSingle();
     if (error) return toast.error(error.message);
-    setProjects(projects.filter((p) => p.id !== id));
+    if (!data) return toast.error("Project not found or you do not have permission to delete it.");
+    setProjects((current) => current.filter((p) => p.id !== id));
     toast.success("Project deleted");
   };
 
@@ -111,12 +130,12 @@ export default function Projects() {
               </DialogHeader>
               <div className="space-y-4 pt-2">
                 <div className="space-y-1.5">
-                  <Label>Project Name</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="My Awesome Project" />
+                  <Label htmlFor="project-name">Project Name</Label>
+                  <Input id="project-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="My Awesome Project" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Description</Label>
-                  <Textarea value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What is this project about?" />
+                  <Label htmlFor="project-description">Description</Label>
+                  <Textarea id="project-description" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What is this project about?" />
                 </div>
                 <Button onClick={handleSubmit} disabled={submitting} className="w-full">
                   {submitting ? "Saving..." : editing ? "Save Changes" : "Create Project"}
