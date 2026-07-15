@@ -356,21 +356,16 @@ export default function ProjectWorkspace() {
   return (
     <AppShell>
       <div className="flex h-full min-h-0 overflow-hidden">
-        {/* Desktop Left Sidebar */}
-        <aside className="hidden w-72 shrink-0 overflow-hidden border-r border-border bg-card p-4 md:block">
-          {SidebarContent}
-        </aside>
-
         {/* Chat Area */}
         <div className="flex min-w-0 flex-1 flex-col">
           {selectedConvoId ? (
             <>
               <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5 sm:px-4 sm:py-3">
                 <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                  {/* Mobile menu trigger */}
+                  {/* Conversations panel trigger (all viewports) */}
                   <Sheet>
                     <SheetTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 md:hidden" aria-label="Conversations">
+                      <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" aria-label="Conversations">
                         <Menu className="h-5 w-5" />
                       </Button>
                     </SheetTrigger>
@@ -381,13 +376,50 @@ export default function ProjectWorkspace() {
                       {SidebarContent}
                     </SheetContent>
                   </Sheet>
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary/10">
-                    <AssistantIcon className="h-4 w-4 text-secondary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{currentAssistant?.name || "AI Assistant"}</p>
-                    <p className="truncate text-xs text-muted-foreground">{currentConvo?.title}</p>
-                  </div>
+                  {/* Assistant info chip — opens right-side details */}
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <button
+                        type="button"
+                        className="flex min-w-0 items-center gap-2 rounded-lg px-1.5 py-1 text-left transition-colors hover:bg-muted sm:gap-3"
+                        aria-label="Assistant details"
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary/10">
+                          <AssistantIcon className="h-4 w-4 text-secondary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="flex items-center gap-1 truncate text-sm font-semibold">
+                            {currentAssistant?.name || "AI Assistant"}
+                            <Info className="h-3 w-3 shrink-0 text-muted-foreground" />
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">{currentConvo?.title}</p>
+                        </div>
+                      </button>
+                    </SheetTrigger>
+                    <SheetContent side="right" className="w-80 max-w-[85vw] p-4">
+                      <SheetHeader className="mb-3 text-left">
+                        <SheetTitle className="text-base">Assistant</SheetTitle>
+                      </SheetHeader>
+                      {currentAssistant && (
+                        <Card className="border border-border">
+                          <CardHeader className="text-center">
+                            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10">
+                              <AssistantIcon className="h-6 w-6 text-secondary" />
+                            </div>
+                            <CardTitle className="text-base">{currentAssistant.name}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-muted-foreground">{currentAssistant.description}</p>
+                            {currentAssistant.category && (
+                              <div className="mt-3 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+                                Category: {currentAssistant.category}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+                    </SheetContent>
+                  </Sheet>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   {messages.length > 6 && (
@@ -572,8 +604,8 @@ export default function ProjectWorkspace() {
             </>
           ) : (
             <>
-              {/* Mobile menu trigger when no convo selected */}
-              <div className="flex items-center justify-between border-b border-border px-3 py-2.5 md:hidden">
+              {/* Menu trigger when no convo selected */}
+              <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
                 <Sheet>
                   <SheetTrigger asChild>
                     <Button variant="ghost" size="sm" className="gap-2">
@@ -601,28 +633,6 @@ export default function ProjectWorkspace() {
             </>
           )}
         </div>
-
-        {/* Right Panel */}
-        <aside className="hidden w-64 shrink-0 border-l border-border bg-card p-4 lg:block">
-          {currentAssistant && (
-            <Card className="border border-border">
-              <CardHeader className="text-center">
-                <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10">
-                  <AssistantIcon className="h-6 w-6 text-secondary" />
-                </div>
-                <CardTitle className="text-base">{currentAssistant.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">{currentAssistant.description}</p>
-                {currentAssistant.category && (
-                  <div className="mt-3 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
-                    Category: {currentAssistant.category}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </aside>
       </div>
 
       <Dialog open={chatTooLong} onOpenChange={setChatTooLong}>
