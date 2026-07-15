@@ -9,6 +9,12 @@ type Part =
 
 const FENCE_RE = /```([\w+-]*)\n?([\s\S]*?)```/g;
 
+// Detects a "Prompt:" style label followed by a block of text that should be
+// treated as a copy-paste prompt even when the model forgets to fence it.
+// Matches labels like:  Prompt:  |  Here's the prompt:  |  Copy this prompt:
+const LABELED_PROMPT_RE =
+  /(^|\n)\s*(?:here(?:'|’)?s\s+(?:the|your)\s+prompt|copy\s+this\s+prompt|use\s+this\s+prompt|prompt)\s*[:\-—]\s*\n+([\s\S]+?)(?=\n\s*\n\S|\n#{1,6}\s|$)/i;
+
 function parse(content: string): Part[] {
   const parts: Part[] = [];
   let last = 0;
@@ -33,7 +39,32 @@ function parse(content: string): Part[] {
   const tail = content.slice(last);
   if (tail.trim()) parts.push({ type: "text", text: tail.replace(/^\s+/, "") });
   if (parts.length === 0) parts.push({ type: "text", text: content });
-  return parts;
+  // Backup heuristic: within any remaining plain-text parts, if we find a
+  // "Prompt:"-style label followed by a substantial block, promote it to a
+  // prompt code block. Only runs on text that had no fences to avoid touching
+  // already well-formatted output.
+  const expanded: Part[] = [];
+  for (const p of parts) {
+    if (p.type !== "text") {
+      expanded.push(p);
+      continue;
+    }
+    const match = p.text.match(LABELED_PROMPT_RE);
+    const captured = match?.[2]?.trim() ?? "";
+    // Only treat as a prompt if it's a meaningful chunk (avoids catching
+    // one-liners like "Prompt: hi").
+    if (match && captured.length >= 40) {
+      const start = p.text.indexOf(match[0]);
+      const beforeText = p.text.slice(0, start + (match[1] ? match[1].length : 0)).replace(/\s+$/, "");
+      const afterText = p.text.slice(start + match[0].length).replace(/^\s+/, "");
+      if (beforeText.trim()) expanded.push({ type: "text", text: beforeText });
+      expanded.push({ type: "code", lang: "prompt", code: captured, isPrompt: true });
+      if (afterText.trim()) expanded.push({ type: "text", text: afterText });
+    } else {
+      expanded.push(p);
+    }
+  }
+  return expanded;
 }
 
 function CodeBlock({ lang, code, isPrompt }: { lang: string; code: string; isPrompt: boolean }) {
