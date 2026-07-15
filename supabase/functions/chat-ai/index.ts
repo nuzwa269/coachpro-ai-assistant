@@ -244,6 +244,16 @@ function buildPayload(opts: {
   const out: Msg[] = [];
   if (opts.systemPrompt) out.push({ role: "system", content: opts.systemPrompt });
 
+  // Global formatting rule — applies to every assistant automatically so that
+  // any ready-to-use prompt the model shares to the user is wrapped in a
+  // fenced ```prompt block. The AssistantMessage component renders such
+  // blocks with a Copy button for one-click reuse.
+  out.push({
+    role: "system",
+    content:
+      "Formatting rule: Whenever you provide a ready-to-use prompt that the user is expected to copy and paste into another AI tool (ChatGPT, Claude, Midjourney, image generators, coding assistants, etc.), output ONLY the prompt text inside a fenced code block tagged `prompt`, like this:\n\n```prompt\n<the prompt text here>\n```\n\nRules:\n- Put any explanation, context, or tips BEFORE or AFTER the code block, never inside it.\n- The block must contain only the prompt itself so the user can copy-paste it as-is.\n- If you provide multiple prompts, use a separate ```prompt block for each one.\n- Short conversational replies, greetings, or answers that are not prompts do not need a code block.",
+  });
+
   if (opts.history.length > opts.keep && (opts.summary || opts.durableFacts)) {
     const memBlock = [
       opts.summary ? `Conversation summary so far:\n${opts.summary}` : "",
