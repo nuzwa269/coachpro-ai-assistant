@@ -42,6 +42,8 @@ type Assistant = {
   category: string | null; is_prebuilt: boolean;
   system_prompt: string; default_model_id: string | null;
   conversation_starters?: string[] | null;
+  provides_image_prompt?: boolean;
+  image_credits_cost?: number;
 };
 type Conversation = { id: string; title: string; assistant_id: string };
 type Message = {
