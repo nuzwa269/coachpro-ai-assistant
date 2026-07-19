@@ -271,6 +271,35 @@ export function AdminAssistants() {
                   ))}
                 </div>
               </div>
+
+              <div className="grid gap-2 rounded-md border border-border p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <Label>Provide image prompt</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Assistant appends a ready-to-use image prompt to every reply. User can click "Generate image" to render it on demand.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={form.provides_image_prompt}
+                    onCheckedChange={(v) => setForm({ ...form, provides_image_prompt: v })}
+                  />
+                </div>
+                {form.provides_image_prompt && (
+                  <div className="grid gap-1">
+                    <Label htmlFor="img-cost" className="text-xs">Credits per image</Label>
+                    <Input
+                      id="img-cost"
+                      type="number"
+                      min={1}
+                      max={200}
+                      value={form.image_credits_cost}
+                      onChange={(e) => setForm({ ...form, image_credits_cost: Number(e.target.value) })}
+                      className="w-32"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <DialogFooter>
