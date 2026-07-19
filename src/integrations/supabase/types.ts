@@ -74,12 +74,10 @@ export type Database = {
           description: string | null
           icon: string
           id: string
-          image_credits_cost: number
           is_active: boolean
           is_prebuilt: boolean
           name: string
           owner_id: string | null
-          provides_image_prompt: boolean
           sort_order: number
           system_prompt: string
           updated_at: string
@@ -92,12 +90,10 @@ export type Database = {
           description?: string | null
           icon?: string
           id?: string
-          image_credits_cost?: number
           is_active?: boolean
           is_prebuilt?: boolean
           name: string
           owner_id?: string | null
-          provides_image_prompt?: boolean
           sort_order?: number
           system_prompt: string
           updated_at?: string
@@ -110,12 +106,10 @@ export type Database = {
           description?: string | null
           icon?: string
           id?: string
-          image_credits_cost?: number
           is_active?: boolean
           is_prebuilt?: boolean
           name?: string
           owner_id?: string | null
-          provides_image_prompt?: boolean
           sort_order?: number
           system_prompt?: string
           updated_at?: string
@@ -741,7 +735,6 @@ export type Database = {
         | "refund"
         | "trial_grant"
         | "trial_revert"
-        | "image_generation"
       user_plan: "free" | "basic" | "pro"
     }
     CompositeTypes: {
@@ -885,7 +878,6 @@ export const Constants = {
         "refund",
         "trial_grant",
         "trial_revert",
-        "image_generation",
       ],
       user_plan: ["free", "basic", "pro"],
     },

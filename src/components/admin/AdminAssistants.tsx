@@ -32,8 +32,6 @@ type Assistant = {
   owner_id: string | null;
   sort_order: number;
   conversation_starters: string[];
-  provides_image_prompt: boolean;
-  image_credits_cost: number;
 };
 
 type ModelOpt = { id: string; display_name: string };
@@ -51,8 +49,6 @@ const emptyForm = {
   system_prompt: "",
   default_model_id: "",
   starters: ["", "", "", "", ""] as string[],
-  provides_image_prompt: false,
-  image_credits_cost: 15,
 };
 
 export function AdminAssistants() {
@@ -69,7 +65,7 @@ export function AdminAssistants() {
     const [a, m] = await Promise.all([
       supabase
         .from("assistants")
-        .select("id,name,description,category,icon,system_prompt,default_model_id,is_prebuilt,is_active,owner_id,sort_order,conversation_starters,provides_image_prompt,image_credits_cost")
+        .select("id,name,description,category,icon,system_prompt,default_model_id,is_prebuilt,is_active,owner_id,sort_order,conversation_starters")
         .order("is_prebuilt", { ascending: false })
         .order("sort_order", { ascending: true })
         .order("name"),
@@ -109,8 +105,6 @@ export function AdminAssistants() {
       system_prompt: a.system_prompt,
       default_model_id: a.default_model_id ?? "",
       starters: s,
-      provides_image_prompt: !!a.provides_image_prompt,
-      image_credits_cost: a.image_credits_cost ?? 15,
     });
     setDialogOpen(true);
   };
@@ -128,8 +122,6 @@ export function AdminAssistants() {
       system_prompt: form.system_prompt.trim(),
       default_model_id: form.default_model_id || null,
       conversation_starters: form.starters.map((s) => s.trim()).filter(Boolean).slice(0, 5),
-      provides_image_prompt: form.provides_image_prompt,
-      image_credits_cost: Math.max(1, Math.min(200, Number(form.image_credits_cost) || 15)),
     };
 
     const { error } = editing
@@ -270,35 +262,6 @@ export function AdminAssistants() {
                     />
                   ))}
                 </div>
-              </div>
-
-              <div className="grid gap-2 rounded-md border border-border p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <Label>Provide image prompt</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Assistant appends a ready-to-use image prompt to every reply. User can click "Generate image" to render it on demand.
-                    </p>
-                  </div>
-                  <Switch
-                    checked={form.provides_image_prompt}
-                    onCheckedChange={(v) => setForm({ ...form, provides_image_prompt: v })}
-                  />
-                </div>
-                {form.provides_image_prompt && (
-                  <div className="grid gap-1">
-                    <Label htmlFor="img-cost" className="text-xs">Credits per image</Label>
-                    <Input
-                      id="img-cost"
-                      type="number"
-                      min={1}
-                      max={200}
-                      value={form.image_credits_cost}
-                      onChange={(e) => setForm({ ...form, image_credits_cost: Number(e.target.value) })}
-                      className="w-32"
-                    />
-                  </div>
-                )}
               </div>
             </div>
 
