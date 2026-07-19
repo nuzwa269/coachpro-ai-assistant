@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     // Ownership check + fetch assistant system prompt server-side
     const { data: convo, error: convoErr } = await serviceClient
       .from("conversations")
-      .select("user_id, assistant_id, assistants ( system_prompt, default_model_id )")
+      .select("user_id, assistant_id, assistants ( system_prompt, default_model_id, provides_image_prompt, image_credits_cost )")
       .eq("id", conversation_id)
       .maybeSingle();
     if (convoErr || !convo || convo.user_id !== userId) {
@@ -62,6 +62,10 @@ Deno.serve(async (req) => {
       (convo as any).assistants?.system_prompt ?? undefined;
     const assistantDefaultModel: string | undefined =
       (convo as any).assistants?.default_model_id ?? undefined;
+    const providesImagePrompt: boolean =
+      !!(convo as any).assistants?.provides_image_prompt;
+    const imageCreditsCost: number =
+      (convo as any).assistants?.image_credits_cost ?? 15;
 
     // Server-side default model: if the assistant has one configured, it
     // overrides whatever the client sent. Guarantees the assistant always
@@ -112,6 +116,8 @@ Deno.serve(async (req) => {
       summary: sumRow?.summary ?? "",
       durableFacts: sumRow?.durable_facts ?? "",
       keep: RECENT_WINDOW,
+      providesImagePrompt,
+      imageCreditsCost,
     });
 
     // Call provider with retry-on-overflow
@@ -143,6 +149,8 @@ Deno.serve(async (req) => {
           summary: sumRow2?.summary ?? "",
           durableFacts: sumRow2?.durable_facts ?? "",
           keep: AGGRESSIVE_KEEP,
+          providesImagePrompt,
+          imageCreditsCost,
         });
         try {
           assistantContent = await callProvider(model, retryPayload, maxOutputTokens);
@@ -240,6 +248,8 @@ function buildPayload(opts: {
   summary: string;
   durableFacts: string;
   keep: number;
+  providesImagePrompt?: boolean;
+  imageCreditsCost?: number;
 }): Msg[] {
   const out: Msg[] = [];
   if (opts.systemPrompt) out.push({ role: "system", content: opts.systemPrompt });
@@ -253,6 +263,15 @@ function buildPayload(opts: {
     content:
       "Formatting rule: Whenever you provide a ready-to-use prompt that the user is expected to copy and paste into another AI tool (ChatGPT, Claude, Midjourney, image generators, coding assistants, etc.), output ONLY the prompt text inside a fenced code block tagged `prompt`, like this:\n\n```prompt\n<the prompt text here>\n```\n\nRules:\n- Put any explanation, context, or tips BEFORE or AFTER the code block, never inside it.\n- The block must contain only the prompt itself so the user can copy-paste it as-is.\n- If you provide multiple prompts, use a separate ```prompt block for each one.\n- Short conversational replies, greetings, or answers that are not prompts do not need a code block.",
   });
+
+  if (opts.providesImagePrompt) {
+    const cost = opts.imageCreditsCost ?? 15;
+    out.push({
+      role: "system",
+      content:
+        `Image-prompt rule: At the END of every response, always include ONE fenced code block tagged \`image-prompt\` that contains a detailed English text-to-image prompt (60–120 words) capturing the most relevant visual for what you just described. Format:\n\n\`\`\`image-prompt\n<detailed English visual prompt: subject, style, composition, lighting, colors, mood, camera/angle, aspect ratio>\n\`\`\`\n\nRules:\n- The image prompt must be in ENGLISH even if the rest of the reply is in another language.\n- Do NOT generate the image yourself. Only provide the text prompt.\n- Directly after the code block, add one short line in the user's language telling them they can click the "Generate image" button to render it for ${cost} credits, or copy the prompt to use elsewhere for free.\n- Include this image-prompt block on every substantive reply, not only when explicitly asked.`,
+    });
+  }
 
   if (opts.history.length > opts.keep && (opts.summary || opts.durableFacts)) {
     const memBlock = [

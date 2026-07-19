@@ -42,6 +42,8 @@ type Assistant = {
   category: string | null; is_prebuilt: boolean;
   system_prompt: string; default_model_id: string | null;
   conversation_starters?: string[] | null;
+  provides_image_prompt?: boolean;
+  image_credits_cost?: number;
 };
 type Conversation = { id: string; title: string; assistant_id: string };
 type Message = {
@@ -83,7 +85,7 @@ export default function ProjectWorkspace() {
       setLoading(true);
       const [projRes, assistRes, activeRes, convoRes, savedRes] = await Promise.all([
         supabase.from("projects").select("id,name,description").eq("id", id).maybeSingle(),
-        supabase.from("assistants").select("id,name,description,icon,category,is_prebuilt,system_prompt,default_model_id,conversation_starters").eq("is_active", true),
+        supabase.from("assistants").select("id,name,description,icon,category,is_prebuilt,system_prompt,default_model_id,conversation_starters,provides_image_prompt,image_credits_cost").eq("is_active", true),
         supabase.from("user_active_assistants").select("assistant_id").eq("user_id", user.id),
         supabase.from("conversations").select("id,title,assistant_id").eq("project_id", id).order("updated_at", { ascending: false }),
         supabase.from("saved_responses").select("message_id").eq("user_id", user.id),
@@ -506,7 +508,18 @@ export default function ProjectWorkspace() {
                             m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                           }`}>
                             {m.role === "assistant" ? (
-                              <AssistantMessage content={m.content} />
+                              <AssistantMessage
+                                content={m.content}
+                                messageId={m.id}
+                                imageEnabled={!!currentAssistant?.provides_image_prompt}
+                                imageCost={currentAssistant?.image_credits_cost ?? 15}
+                                onImageGenerated={(newContent) => {
+                                  setMessages((arr) =>
+                                    arr.map((x) => (x.id === m.id ? { ...x, content: newContent } : x)),
+                                  );
+                                  refreshProfile?.();
+                                }}
+                              />
                             ) : (
                               <p
                                 className="whitespace-pre-wrap"
