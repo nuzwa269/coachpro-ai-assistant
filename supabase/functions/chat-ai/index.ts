@@ -149,6 +149,8 @@ Deno.serve(async (req) => {
           summary: sumRow2?.summary ?? "",
           durableFacts: sumRow2?.durable_facts ?? "",
           keep: AGGRESSIVE_KEEP,
+          providesImagePrompt,
+          imageCreditsCost,
         });
         try {
           assistantContent = await callProvider(model, retryPayload, maxOutputTokens);
