@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     // Ownership check + fetch assistant system prompt server-side
     const { data: convo, error: convoErr } = await serviceClient
       .from("conversations")
-      .select("user_id, assistant_id, assistants ( system_prompt, default_model_id )")
+      .select("user_id, assistant_id, assistants ( system_prompt, default_model_id, provides_image_prompt, image_credits_cost )")
       .eq("id", conversation_id)
       .maybeSingle();
     if (convoErr || !convo || convo.user_id !== userId) {
@@ -62,6 +62,10 @@ Deno.serve(async (req) => {
       (convo as any).assistants?.system_prompt ?? undefined;
     const assistantDefaultModel: string | undefined =
       (convo as any).assistants?.default_model_id ?? undefined;
+    const providesImagePrompt: boolean =
+      !!(convo as any).assistants?.provides_image_prompt;
+    const imageCreditsCost: number =
+      (convo as any).assistants?.image_credits_cost ?? 15;
 
     // Server-side default model: if the assistant has one configured, it
     // overrides whatever the client sent. Guarantees the assistant always
@@ -112,6 +116,8 @@ Deno.serve(async (req) => {
       summary: sumRow?.summary ?? "",
       durableFacts: sumRow?.durable_facts ?? "",
       keep: RECENT_WINDOW,
+      providesImagePrompt,
+      imageCreditsCost,
     });
 
     // Call provider with retry-on-overflow
