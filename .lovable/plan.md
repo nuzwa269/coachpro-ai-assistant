@@ -1,35 +1,21 @@
-## مقصد
-جب بھی کوئی اسسٹنٹ چیٹ میں کوئی "پرومپٹ" (یعنی ایسا متن جو یوزر نے کاپی کر کے کسی اور AI ٹول میں پیسٹ کرنا ہے) دے، وہ ہمیشہ ایک الگ code block میں Copy بٹن کے ساتھ دکھائی دے۔
+## Forgot Password فیچر
 
-## طریقہ کار: Global (ہر اسسٹنٹ پر خودکار)
-ہدایت manually ہر اسسٹنٹ کو دینے کے بجائے edge function میں ایک بار شامل کی جائے گی — تمام موجودہ اور مستقبل کے assistants پر خودکار لاگو ہو گی۔
+Supabase auth کا built-in password recovery استعمال کریں گے۔ یوزر ای میل دے گا → ایک reset لنک اسی ای میل پر جائے گا → لنک پر کلک کرکے نیا پاس ورڈ سیٹ کرے گا۔
 
-## موجودہ صورتحال
-`src/components/chat/AssistantMessage.tsx` پہلے سے fenced code blocks (` ```prompt … ``` `) اور "Prompt:" لیبل کو detect کر کے Copy بٹن والا بلاک رینڈر کرتا ہے۔ صرف مسئلہ یہ ہے کہ ماڈل ہمیشہ یہ format استعمال نہیں کرتا۔
+### فلو
+1. Login پیج پر "Forgot password?" لنک → `/forgot-password` پر لے جائے گا۔
+2. `/forgot-password` — ای میل انپٹ + Send reset link بٹن۔ `supabase.auth.resetPasswordForEmail(email, { redirectTo: ${window.location.origin}/reset-password })` کال ہوگا۔ کامیابی پر: "Check your inbox" پیغام۔
+3. یوزر ای میل میں لنک کھولے → app `/reset-password` پر آئے گا۔ Supabase URL hash میں recovery token دے گا اور خودکار session بنائے گا (event: `PASSWORD_RECOVERY`)۔
+4. `/reset-password` — نیا پاس ورڈ + تصدیق فیلڈز۔ `supabase.auth.updateUser({ password })` کال ہوگا۔ کامیابی پر toast + `/dashboard` پر ری ڈائریکٹ۔
 
-## تبدیلیاں
+### فائلیں
+- **New:** `src/pages/ForgotPassword.tsx` — ای میل فارم، loading state، success state۔
+- **New:** `src/pages/ResetPassword.tsx` — دو پاس ورڈ فیلڈز (نیا + confirm)، minimum 6 chars validation، match check۔ Public route (auth کے بغیر قابلِ رسائی کیونکہ recovery session خود Supabase بناتا ہے)۔
+- **Edit:** `src/App.tsx` — دونوں routes register کریں (public)۔
+- **Edit:** `src/pages/Login.tsx` — password فیلڈ کے نیچے "Forgot password?" لنک۔
 
-### 1) `supabase/functions/chat-ai/index.ts` — Global formatting rule
-`buildPayload` میں اسسٹنٹ کے اپنے `system_prompt` کے **بعد** ایک اضافی system message شامل کیا جائے گا:
+### ای میلز
+Lovable Cloud خودکار طور پر default recovery ای میل بھیجے گا — کوئی extra setup درکار نہیں۔ اگر بعد میں custom branded ای میل چاہیے تو الگ سے auth email templates scaffold کیے جا سکتے ہیں (اس plan میں شامل نہیں)۔
 
-> "Formatting rule: Whenever you provide a ready-to-use prompt that the user is expected to copy and paste into another AI tool, output ONLY the prompt inside a fenced code block tagged `prompt` (```` ```prompt ... ``` ````). Put any explanation before or after the block, never inside it. Short conversational replies do not need this."
-
-- Assistant کے اپنے system prompt کو overwrite نہیں کرے گا — ساتھ append ہو گا۔
-- تمام assistants پر خودکار لاگو۔ نئے assistants بھی بغیر config کے follow کریں گے۔
-
-### 2) `src/components/chat/AssistantMessage.tsx` — Parser بہتری (backup)
-اگر کبھی ماڈل fence بھول جائے مگر "Prompt:" / "Here's the prompt:" / "Copy this prompt:" جیسا واضح لیبل ہو اور اس کے بعد ایک لمبا paragraph ہو، تو اسے بھی خودکار طور پر `prompt` code block کے طور پر render کیا جائے۔ باقی موجودہ logic میں کوئی تبدیلی نہیں۔
-
-## کیا نہیں بدلے گا
-- کسی بھی assistant کا DB والا `system_prompt`
-- Credits, models, RLS, conversations, layout
-- User messages کی rendering
-- موجودہ code blocks کا رویہ
-
-## متاثر فائلیں
-1. `supabase/functions/chat-ai/index.ts`
-2. `src/components/chat/AssistantMessage.tsx`
-
-## تصدیق
-- نئی چیٹ میں کسی بھی assistant سے پرومپٹ منگوا کر دیکھنا کہ Copy بٹن کے ساتھ code block میں آئے۔
-- پرانی چیٹس بھی درست دکھیں (client heuristic کی وجہ سے)۔
+### ڈیزائن
+موجودہ Login/Signup پیجز کا ہی layout، colors (orange/purple)، Poppins/Inter فونٹس استعمال ہوں گے تاکہ consistency رہے۔
