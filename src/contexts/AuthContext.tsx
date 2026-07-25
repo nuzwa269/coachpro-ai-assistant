@@ -31,6 +31,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Idle auto sign-out after 30 minutes of inactivity
+  const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+
   const loadProfileAndRole = useCallback(async (userId: string) => {
     const [{ data: prof }, { data: roles }] = await Promise.all([
       supabase
@@ -82,6 +85,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setIsAdmin(false);
   }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        await supabase.auth.signOut();
+        setProfile(null);
+        setIsAdmin(false);
+        try {
+          const { toast } = await import("@/hooks/use-toast");
+          toast({
+            title: "Signed out",
+            description: "You were signed out after 30 minutes of inactivity.",
+          });
+        } catch {}
+      }, IDLE_TIMEOUT_MS);
+    };
+    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "visibilitychange"];
+    events.forEach((e) => window.addEventListener(e, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((e) => window.removeEventListener(e, reset));
+    };
+  }, [session]);
 
   return (
     <AuthContext.Provider value={{ session, user, profile, isAdmin, loading, refreshProfile, signOut }}>
