@@ -214,9 +214,27 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("chat-ai error:", e);
+    const m = e instanceof Error ? e.message : String(e);
+    if (m === "ai_credits_exhausted") {
+      return json(
+        {
+          error: "ai_credits_exhausted",
+          message:
+            "The AI service account has run out of credits. The app owner needs to top up AI credits — your own credits were not used.",
+        },
+        402,
+      );
+    }
+    if (m === "ai_rate_limited") {
+      return json({ error: "ai_rate_limited", message: "AI is busy right now. Please wait a moment and try again." }, 429);
+    }
+    if (m === "ai_blocked") {
+      return json({ error: "ai_blocked", message: "AI access is currently blocked for this workspace. Contact support." }, 403);
+    }
     return json({ error: "Something went wrong. Please try again." }, 500);
   }
 });
+
 
 // ---------- helpers ----------
 
@@ -344,8 +362,12 @@ async function callOpenAICompat(opts: {
     if (isContextOverflowError(t)) {
       throw new Error("context_length_exceeded");
     }
+    if (resp.status === 402) throw new Error("ai_credits_exhausted");
+    if (resp.status === 429) throw new Error("ai_rate_limited");
+    if (resp.status === 403) throw new Error("ai_blocked");
     throw new Error("AI provider request failed. Please try again.");
   }
+
   const data = await resp.json();
   return data.choices?.[0]?.message?.content ?? "";
 }
