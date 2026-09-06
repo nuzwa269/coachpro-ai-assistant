@@ -234,17 +234,28 @@ export default function ProjectWorkspace() {
       // Refresh credits in header/sidebar
       await refreshProfile();
     } catch (err: any) {
-      const msg = err?.message || err?.context?.error || "AI request failed";
+      let msg = err?.message || err?.context?.error || "AI request failed";
+      // Edge function non-2xx: read the JSON body for the real reason
+      try {
+        const body = await err?.context?.json?.();
+        if (body?.message) msg = body.message;
+        else if (body?.error) msg = body.error;
+      } catch {}
       const errCode = err?.context?.error || (typeof err?.message === "string" && err.message);
       if (msg === "chat_too_long" || errCode === "chat_too_long" || /chat_too_long/i.test(msg)) {
         setChatTooLong(true);
+      } else if (/ai_credits_exhausted|out of credits|run out of credits/i.test(msg)) {
+        toast.error("AI service out of credits", {
+          description: "The app owner needs to top up AI credits. Your credits were not used.",
+        });
       } else if (msg.includes("Insufficient")) {
         toast.error("Out of credits", { description: "Top up to keep chatting." });
-      } else if (msg.includes("Rate") || msg.includes("429")) {
-        toast.error("Rate limited", { description: "Please wait a moment and try again." });
+      } else if (/ai_rate_limited/i.test(msg) || msg.includes("Rate") || msg.includes("429")) {
+        toast.error("AI is busy", { description: "Please wait a moment and try again." });
       } else {
         toast.error(msg);
       }
+
     } finally {
       setSending(false);
       setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }), 50);
